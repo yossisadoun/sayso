@@ -167,6 +167,68 @@ def summarize_book(book_dir):
 
 
 class Handler(SimpleHTTPRequestHandler):
+    def send_head(self):
+        range_header = self.headers.get("Range")
+        if range_header:
+            path = Path(self.translate_path(self.path))
+            if path.is_file():
+                return self.send_range_head(path, range_header)
+        return super().send_head()
+
+    def send_range_head(self, path, range_header):
+        size = path.stat().st_size
+        match = re.match(r"bytes=(\d*)-(\d*)$", range_header.strip())
+        if not match:
+            self.send_error(416, "Requested Range Not Satisfiable")
+            return None
+
+        start_text, end_text = match.groups()
+        if start_text:
+            start = int(start_text)
+            end = int(end_text) if end_text else size - 1
+        else:
+            suffix_length = int(end_text or "0")
+            if suffix_length <= 0:
+                self.send_error(416, "Requested Range Not Satisfiable")
+                return None
+            start = max(size - suffix_length, 0)
+            end = size - 1
+
+        if start >= size or end < start:
+            self.send_response(416)
+            self.send_header("Content-Range", f"bytes */{size}")
+            self.end_headers()
+            return None
+
+        end = min(end, size - 1)
+        file = path.open("rb")
+        file.seek(start)
+        self.range_remaining = end - start + 1
+
+        self.send_response(206)
+        self.send_header("Content-type", self.guess_type(str(path)))
+        self.send_header("Accept-Ranges", "bytes")
+        self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
+        self.send_header("Content-Length", str(self.range_remaining))
+        self.end_headers()
+        return file
+
+    def copyfile(self, source, outputfile):
+        remaining = getattr(self, "range_remaining", None)
+        if remaining is None:
+            super().copyfile(source, outputfile)
+            return
+
+        try:
+            while remaining > 0:
+                chunk = source.read(min(64 * 1024, remaining))
+                if not chunk:
+                    break
+                outputfile.write(chunk)
+                remaining -= len(chunk)
+        finally:
+            self.range_remaining = None
+
     def end_headers(self):
         self.send_header("Cache-Control", "no-store")
         super().end_headers()
