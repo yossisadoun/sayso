@@ -114,9 +114,6 @@
         letter-spacing: 0;
         line-height: 1.08;
         text-align: center;
-        opacity: 0;
-        transform: translateY(8px);
-        animation: openingTextFade 1050ms ease 260ms forwards;
       }
 
       .opening-book {
@@ -130,15 +127,67 @@
         text-underline-offset: 0.12em;
       }
 
+      .opening-book.is-hidden,
+      .opening-punctuation.is-hidden {
+        display: none;
+      }
+
       .opening-book:focus-visible {
         outline: 2px solid rgba(44, 88, 112, 0.42);
         outline-offset: 5px;
       }
 
-      @keyframes openingTextFade {
-        to {
-          opacity: 1;
-          transform: translateY(0);
+      .opening-cursor {
+        display: inline-block;
+        width: 0.45em;
+        margin-left: 0.02em;
+        color: rgba(16, 18, 20, 0.72);
+        animation: openingCursorBlink 900ms steps(1, end) infinite;
+      }
+
+      .opening-break {
+        display: block;
+        height: 0;
+      }
+
+      .opening-layouts {
+        position: fixed;
+        right: 28px;
+        bottom: max(28px, env(safe-area-inset-bottom));
+        left: 28px;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        opacity: 1;
+        transition:
+          opacity 300ms ease,
+          transform 300ms ease;
+      }
+
+      .opening-layouts.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(8px);
+      }
+
+      .opening-layout {
+        min-width: 108px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(16, 18, 20, 0.08);
+        color: rgba(16, 18, 20, 0.7);
+        font-size: 13px;
+        font-weight: 760;
+      }
+
+      .opening-layout.is-primary {
+        background: var(--ink);
+        color: rgba(255, 255, 255, 0.94);
+      }
+
+      @keyframes openingCursorBlink {
+        50% {
+          opacity: 0;
         }
       }
 
@@ -152,6 +201,10 @@
         margin: 0 auto;
         overflow: hidden;
         touch-action: manipulation;
+      }
+
+      .app.is-compact {
+        grid-template-rows: minmax(0, 1fr) auto;
       }
 
       .reader {
@@ -201,6 +254,15 @@
         justify-content: center;
         min-height: 0;
         padding: 18px 0 14px;
+      }
+
+      .app.is-compact .stage {
+        flex: 1 1 auto;
+        padding-bottom: 8px;
+      }
+
+      .app.is-compact .reader {
+        padding-bottom: 10px;
       }
 
       .words {
@@ -334,11 +396,37 @@
         backdrop-filter: blur(22px);
       }
 
+      .app.is-compact .translation {
+        grid-template-rows: auto auto;
+        gap: 10px;
+        padding: 11px 22px max(12px, env(safe-area-inset-bottom));
+      }
+
       .translation-copy {
         display: grid;
         min-height: 0;
         place-items: center;
         text-align: center;
+      }
+
+      .app.is-compact .stage > .translation-copy {
+        flex: 0 0 auto;
+        max-width: 390px;
+        margin: 14px auto 0;
+        place-items: center;
+      }
+
+      .app.is-compact .translation-label {
+        display: none;
+      }
+
+      .app.is-compact .progress-wrap {
+        margin-top: 0;
+      }
+
+      .app.is-compact .mini-meta {
+        margin-top: 7px;
+        font-size: 12px;
       }
 
       .translation-label {
@@ -405,6 +493,20 @@
         line-height: 1.12;
       }
 
+      .app.is-compact .stage > .translation-copy p {
+        color: rgba(16, 18, 20, 0.46);
+        font-size: clamp(29px, 7.6vw, 38px);
+        font-weight: 430;
+      }
+
+      .app.is-compact .stage > .translation-copy p.is-long {
+        font-size: clamp(24px, 6vw, 31px);
+      }
+
+      .app.is-compact .stage > .translation-copy p.is-very-long {
+        font-size: clamp(21px, 5.2vw, 27px);
+      }
+
       .controls {
         position: relative;
         display: grid;
@@ -413,6 +515,10 @@
         justify-content: center;
         gap: 14px;
         margin-top: 18px;
+      }
+
+      .app.is-compact .controls {
+        margin-top: 0;
       }
 
       .control {
@@ -450,6 +556,28 @@
         color: rgba(16, 18, 20, 0.62);
         font-size: 15px;
         font-weight: 760;
+      }
+
+      .continuous {
+        position: absolute;
+        top: 50%;
+        right: calc(50% + 104px);
+        transform: translateY(-50%);
+        width: 50px;
+        height: 38px;
+        border-radius: 999px;
+        background: rgba(16, 18, 20, 0.06);
+        color: rgba(16, 18, 20, 0.62);
+      }
+
+      .continuous.is-selected {
+        background: var(--ink);
+        color: rgba(255, 255, 255, 0.94);
+      }
+
+      .continuous .lucide {
+        width: 18px;
+        height: 18px;
       }
 
       .lucide {
@@ -696,10 +824,13 @@
   </head>
   <body class="intro-active">
     <section class="opening-screen" id="openingScreen" aria-label="Opening screen">
-      <h1 class="opening-title">
-        Hi Meishar, let's read
-        <button class="opening-book" id="openingBook" type="button">Moby Dick</button>.
+      <h1 class="opening-title" aria-label="Hi Meishar, let's read Moby Dick.">
+        <span id="openingTypedText"></span><button class="opening-book is-hidden" id="openingBook" type="button" aria-label="Moby Dick"><span id="openingBookText"></span></button><span class="opening-punctuation is-hidden" id="openingPunctuation">.</span><span class="opening-cursor" aria-hidden="true">|</span>
       </h1>
+      <div class="opening-layouts is-hidden" id="openingLayouts" aria-label="Choose reader layout">
+        <button class="opening-layout" id="standardLayoutButton" type="button">Standard</button>
+        <button class="opening-layout is-primary" id="compactLayoutButton" type="button">Compact</button>
+      </div>
     </section>
 
     <main class="app" id="app" aria-label="German reading trainer" aria-hidden="true" inert>
@@ -768,6 +899,20 @@
           <button class="control skip" id="nextButton" type="button" aria-label="Next phrase">
             <svg class="lucide" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="m9 18 6-6-6-6"></path>
+            </svg>
+          </button>
+          <button
+            class="control continuous"
+            id="continuousButton"
+            type="button"
+            aria-label="Continuous playback"
+            aria-pressed="false"
+          >
+            <svg class="lucide" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="m17 2 4 4-4 4"></path>
+              <path d="M3 11V9a3 3 0 0 1 3-3h15"></path>
+              <path d="m7 22-4-4 4-4"></path>
+              <path d="M21 13v2a3 3 0 0 1-3 3H3"></path>
             </svg>
           </button>
           <button class="control speed" id="speedButton" type="button" aria-label="Reading speed">
@@ -915,18 +1060,24 @@
 
       const wordsEl = document.querySelector("#words");
       const translationEl = document.querySelector("#translationText");
+      const translationSection = document.querySelector(".translation");
+      const translationCopy = document.querySelector(".translation-copy");
       const bookTranslationButton = document.querySelector("#bookTranslationButton");
       const aiTranslationButton = document.querySelector("#aiTranslationButton");
+      const controlsEl = document.querySelector(".controls");
       const playButton = document.querySelector("#playButton");
       const prevButton = document.querySelector("#prevButton");
       const nextButton = document.querySelector("#nextButton");
       const speedButton = document.querySelector("#speedButton");
+      const continuousButton = document.querySelector("#continuousButton");
       const bookChip = document.querySelector("#bookChip");
       const bookChipLabel = document.querySelector("#bookChipLabel");
       const bookIcon = document.querySelector("#bookIcon");
       const appEl = document.querySelector(".app");
       const readerEl = document.querySelector(".reader");
       const progressFill = document.querySelector("#progressFill");
+      const progressWrap = document.querySelector(".progress-wrap");
+      const stageEl = document.querySelector(".stage");
       const elapsedEl = document.querySelector("#elapsed");
       const remainingEl = document.querySelector("#remaining");
       const segmentCountEl = document.querySelector("#segmentCount");
@@ -936,6 +1087,12 @@
       const wordHistoryList = document.querySelector("#wordHistoryList");
       const openingScreen = document.querySelector("#openingScreen");
       const openingBook = document.querySelector("#openingBook");
+      const openingTypedText = document.querySelector("#openingTypedText");
+      const openingBookText = document.querySelector("#openingBookText");
+      const openingPunctuation = document.querySelector("#openingPunctuation");
+      const openingLayouts = document.querySelector("#openingLayouts");
+      const standardLayoutButton = document.querySelector("#standardLayoutButton");
+      const compactLayoutButton = document.querySelector("#compactLayoutButton");
 
       let segmentIndex = 0;
       let currentWordIndex = -1;
@@ -951,10 +1108,13 @@
       const WORD_HISTORY_KEY = `sayso.wordHistory.${BOOK_ID}`;
       const WORD_HISTORY_LIMIT = 80;
       const READING_POSITION_KEY = `sayso.readingPosition.${BOOK_ID}.${MANIFEST_FILE}`;
+      const READER_LAYOUT_KEY = "sayso.readerLayout";
+      const CONTINUOUS_PLAYBACK_KEY = "sayso.continuousPlayback";
       let wordHistory = loadWordHistory();
       const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5];
       let playbackSpeed = Number(window.localStorage.getItem("sayso.playbackSpeed")) || 1;
       if (!SPEED_OPTIONS.includes(playbackSpeed)) playbackSpeed = 1;
+      let continuousPlayback = window.localStorage.getItem(CONTINUOUS_PLAYBACK_KEY) === "true";
       let cachedVoiceId = "";
       let lastTouchEndAt = 0;
       let totalDurationMs = 0;
@@ -987,7 +1147,83 @@
         appEl.addEventListener(eventName, (event) => event.preventDefault());
       });
 
-      function enterReader() {
+      function sleep(ms) {
+        return new Promise((resolve) => window.setTimeout(resolve, ms));
+      }
+
+      async function typeOpeningTitle() {
+        const text = "Hi Meishar, let's read ";
+        const bookTitle = "Moby Dick";
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        if (reducedMotion) {
+          openingTypedText.textContent = "Hi Meishar, let's";
+          openingTypedText.appendChild(document.createElement("span")).className = "opening-break";
+          openingTypedText.append(" read ");
+          openingBookText.textContent = bookTitle;
+          openingBook.classList.remove("is-hidden");
+          openingPunctuation.classList.remove("is-hidden");
+          openingLayouts.classList.remove("is-hidden");
+          return;
+        }
+
+        openingTypedText.textContent = "";
+        openingBookText.textContent = "";
+        openingBook.classList.add("is-hidden");
+        openingPunctuation.classList.add("is-hidden");
+        await sleep(380);
+
+        let insertedOpeningBreak = false;
+        for (const character of text) {
+          if (insertedOpeningBreak && character === " ") {
+            insertedOpeningBreak = false;
+            continue;
+          }
+          openingTypedText.append(character);
+          if (openingTypedText.textContent === "Hi Meishar, let's") {
+            openingTypedText.appendChild(document.createElement("span")).className = "opening-break";
+            insertedOpeningBreak = true;
+            await sleep(120);
+          } else if (character === ",") {
+            await sleep(420);
+          } else if (character === " ") {
+            await sleep(76);
+          } else {
+            await sleep(42 + Math.random() * 54);
+          }
+        }
+
+        await sleep(130);
+        openingBook.classList.remove("is-hidden");
+        for (const character of bookTitle) {
+          openingBookText.textContent += character;
+          await sleep(character === " " ? 82 : 46 + Math.random() * 48);
+        }
+        await sleep(180);
+        openingPunctuation.classList.remove("is-hidden");
+        await sleep(220);
+        openingLayouts.classList.remove("is-hidden");
+      }
+
+      function setReaderLayout(layout) {
+        const isCompact = layout === "compact";
+        appEl.classList.toggle("is-compact", isCompact);
+        standardLayoutButton.classList.toggle("is-primary", !isCompact);
+        compactLayoutButton.classList.toggle("is-primary", isCompact);
+
+        if (isCompact) {
+          stageEl.appendChild(translationCopy);
+          translationSection.insertBefore(progressWrap, controlsEl);
+        } else {
+          translationSection.insertBefore(translationCopy, controlsEl);
+          readerEl.appendChild(progressWrap);
+        }
+
+        window.localStorage.setItem(READER_LAYOUT_KEY, isCompact ? "compact" : "standard");
+      }
+
+      function enterReader(layout = "standard") {
+        setReaderLayout(layout);
         openingScreen.classList.add("is-dismissed");
         document.body.classList.remove("intro-active");
         appEl.removeAttribute("aria-hidden");
@@ -1014,6 +1250,21 @@
         playbackSpeed = SPEED_OPTIONS[(index + 1) % SPEED_OPTIONS.length];
         window.localStorage.setItem("sayso.playbackSpeed", String(playbackSpeed));
         updateSpeedButton();
+      }
+
+      function updateContinuousButton() {
+        continuousButton.classList.toggle("is-selected", continuousPlayback);
+        continuousButton.setAttribute("aria-pressed", String(continuousPlayback));
+        continuousButton.setAttribute(
+          "aria-label",
+          continuousPlayback ? "Continuous playback on" : "Continuous playback off",
+        );
+      }
+
+      function toggleContinuousPlayback() {
+        continuousPlayback = !continuousPlayback;
+        window.localStorage.setItem(CONTINUOUS_PLAYBACK_KEY, String(continuousPlayback));
+        updateContinuousButton();
       }
 
       function cleanWord(word) {
@@ -1459,6 +1710,22 @@
         if ("speechSynthesis" in window) window.speechSynthesis.cancel();
       }
 
+      function finishSingleSegmentPlayback() {
+        playbackToken += 1;
+        window.clearTimeout(playbackTimer);
+        window.cancelAnimationFrame(audioFrame);
+        playbackTimer = null;
+        audioFrame = null;
+        audioPlayer.pause();
+        isPlaying = false;
+        currentWordIndex = -1;
+        playButton.classList.remove("is-playing");
+        playButton.setAttribute("aria-label", "Play phrase");
+        updateWordClasses();
+        updateProgressFromElapsed(segmentStartMs(segmentIndex));
+        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      }
+
       function getWordRanges(text, words) {
         let cursor = 0;
         return words.map((word) => {
@@ -1496,6 +1763,11 @@
 
       function finishCurrentSegment(token) {
         if (!isPlaying || token !== playbackToken) return;
+
+        if (!continuousPlayback) {
+          finishSingleSegmentPlayback();
+          return;
+        }
 
         if (segmentIndex < segments.length - 1) {
           const currentSegment = segments[segmentIndex];
@@ -1728,7 +2000,7 @@
             !isSameAudio ||
             audioPlayer.ended ||
             elapsedMs < unitTiming.start_ms - 90 ||
-            elapsedMs > unitTiming.end_ms + 120;
+            elapsedMs >= unitTiming.end_ms - 90;
 
           if (!isSameAudio) {
             audioPlayer.pause();
@@ -1855,9 +2127,12 @@
       prevButton.addEventListener("click", () => goToSegment(segmentIndex - 1));
       nextButton.addEventListener("click", () => goToSegment(segmentIndex + 1));
       speedButton.addEventListener("click", cyclePlaybackSpeed);
+      continuousButton.addEventListener("click", toggleContinuousPlayback);
       bookTranslationButton.addEventListener("click", () => setTranslationMode("book"));
       aiTranslationButton.addEventListener("click", () => setTranslationMode("ai"));
-      openingBook.addEventListener("click", enterReader);
+      openingBook.addEventListener("click", () => enterReader("standard"));
+      standardLayoutButton.addEventListener("click", () => enterReader("standard"));
+      compactLayoutButton.addEventListener("click", () => enterReader("compact"));
       bookChip.addEventListener("click", openWordHistory);
       wordHistoryClose.addEventListener("click", closeWordHistory);
       wordHistorySheet.addEventListener("click", (event) => {
@@ -1871,6 +2146,8 @@
 
       updateVoiceChip();
       updateSpeedButton();
+      updateContinuousButton();
+      typeOpeningTitle();
       renderWordHistory();
       render();
       loadPageManifest();
