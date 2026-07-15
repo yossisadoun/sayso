@@ -943,6 +943,12 @@
         wordTooltip.classList.remove("is-open");
       }
 
+      function dismissTooltip() {
+        selectedWordIndex = null;
+        hideTooltip();
+        updateWordClasses();
+      }
+
       function showLearning(index, button) {
         const segment = segments[segmentIndex];
         const word = getWords(segment)[index];
@@ -973,6 +979,12 @@
 
         updateWordClasses();
       }
+
+      appEl.addEventListener("pointerdown", (event) => {
+        if (!wordTooltip.classList.contains("is-open")) return;
+        if (event.target.closest(".word") || event.target.closest(".word-tooltip")) return;
+        dismissTooltip();
+      });
 
       function stopPlayback() {
         playbackToken += 1;
