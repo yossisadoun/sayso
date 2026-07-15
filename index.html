@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
     <title>Say So Reader</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -38,6 +41,7 @@
       body {
         min-height: 100vh;
         overflow: hidden;
+        touch-action: manipulation;
         background:
           radial-gradient(circle at 50% 2%, rgba(123, 157, 177, 0.54), transparent 34rem),
           linear-gradient(180deg, #d8e1e4 0%, #faf9f6 52%, #ffffff 100%);
@@ -54,6 +58,7 @@
         color: inherit;
         cursor: pointer;
         font: inherit;
+        touch-action: manipulation;
       }
 
       .app {
@@ -64,6 +69,7 @@
         min-height: 100svh;
         margin: 0 auto;
         overflow: hidden;
+        touch-action: manipulation;
       }
 
       .reader {
@@ -721,6 +727,7 @@
       const speedButton = document.querySelector("#speedButton");
       const bookChipLabel = document.querySelector("#bookChipLabel");
       const bookIcon = document.querySelector("#bookIcon");
+      const appEl = document.querySelector(".app");
       const readerEl = document.querySelector(".reader");
       const progressFill = document.querySelector("#progressFill");
       const elapsedEl = document.querySelector("#elapsed");
@@ -743,8 +750,31 @@
       let playbackSpeed = Number(window.localStorage.getItem("sayso.playbackSpeed")) || 1;
       if (!SPEED_OPTIONS.includes(playbackSpeed)) playbackSpeed = 1;
       let cachedVoiceId = "";
+      let lastTouchEndAt = 0;
       const segmentTimingCache = new Map();
       const audioPlayer = new Audio();
+
+      appEl.addEventListener(
+        "touchmove",
+        (event) => {
+          if (event.touches.length > 1) event.preventDefault();
+        },
+        { passive: false },
+      );
+
+      appEl.addEventListener(
+        "touchend",
+        (event) => {
+          const now = Date.now();
+          if (now - lastTouchEndAt < 320) event.preventDefault();
+          lastTouchEndAt = now;
+        },
+        { passive: false },
+      );
+
+      ["gesturestart", "gesturechange", "gestureend"].forEach((eventName) => {
+        appEl.addEventListener(eventName, (event) => event.preventDefault());
+      });
 
       function formatSpeed(speed) {
         return `${Number.isInteger(speed) ? speed : speed.toFixed(2).replace(/0$/, "")}x`;
