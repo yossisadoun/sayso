@@ -1,0 +1,1194 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Say So Reader</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gentium+Book+Plus:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #101214;
+        --muted: #6f7478;
+        --faint: #a7adb2;
+        --line: rgba(16, 18, 20, 0.1);
+        --panel: rgba(255, 255, 255, 0.78);
+        --panel-solid: #f8f8f6;
+        --accent: #7f9caf;
+        --accent-soft: rgba(127, 156, 175, 0.2);
+        --accent-strong: #2c5870;
+        --shadow: 0 24px 70px rgba(65, 83, 96, 0.18);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 50% 2%, rgba(123, 157, 177, 0.54), transparent 34rem),
+          linear-gradient(180deg, #d8e1e4 0%, #faf9f6 52%, #ffffff 100%);
+        color: var(--ink);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      button {
+        -webkit-tap-highlight-color: transparent;
+        appearance: none;
+        border: 0;
+        color: inherit;
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .app {
+        position: relative;
+        display: grid;
+        grid-template-rows: minmax(0, 2fr) minmax(216px, 1fr);
+        width: min(100vw, 480px);
+        min-height: 100svh;
+        margin: 0 auto;
+        overflow: hidden;
+      }
+
+      .reader {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        padding: max(28px, env(safe-area-inset-top)) 22px 18px;
+      }
+
+      .book-chip {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: fit-content;
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 8px 13px 8px 8px;
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.35);
+        color: rgba(16, 18, 20, 0.74);
+        font-size: 13px;
+        font-weight: 650;
+        letter-spacing: 0;
+        box-shadow: 0 10px 34px rgba(75, 96, 110, 0.1);
+        backdrop-filter: blur(18px);
+      }
+
+      .book-icon {
+        width: 28px;
+        height: 28px;
+        flex: 0 0 auto;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: inset 0 -8px 18px rgba(7, 23, 32, 0.28);
+      }
+
+      .stage {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 0;
+        padding: 18px 0 14px;
+      }
+
+      .words {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px 3px;
+        max-width: 390px;
+        margin: 0 auto;
+        text-align: center;
+      }
+
+      .word {
+        display: inline-grid;
+        place-items: center;
+        min-height: 48px;
+        padding: 3px 4px 5px;
+        border-radius: 10px;
+        background: transparent;
+        color: rgba(16, 18, 20, 0.58);
+        font-family: "Gentium Book Plus", Georgia, serif;
+        font-size: clamp(31px, 9.2vw, 43px);
+        font-weight: 400;
+        letter-spacing: 0;
+        line-height: 1.05;
+        transition:
+          color 180ms ease,
+          font-weight 180ms ease;
+      }
+
+      .word::before,
+      .word-text {
+        grid-area: 1 / 1;
+      }
+
+      .word::before {
+        content: attr(data-word);
+        font-weight: 700;
+        visibility: hidden;
+      }
+
+      .word-text {
+        font: inherit;
+      }
+
+      .word.is-read {
+        color: rgba(16, 18, 20, 0.58);
+      }
+
+      .word.is-current {
+        color: var(--ink);
+      }
+
+      .word.is-current .word-text {
+        font-weight: 700;
+      }
+
+      .word.is-selected {
+        color: var(--ink);
+      }
+
+      .word-tooltip {
+        position: absolute;
+        z-index: 4;
+        top: 0;
+        left: 50%;
+        max-width: min(240px, calc(100vw - 44px));
+        padding: 7px 10px;
+        border-radius: 10px;
+        background: rgba(12, 14, 16, 0.94);
+        box-shadow: 0 14px 34px rgba(16, 18, 20, 0.26);
+        color: rgba(255, 255, 255, 0.94);
+        font-size: 12px;
+        font-weight: 640;
+        line-height: 1.2;
+        opacity: 0;
+        pointer-events: none;
+        text-align: center;
+        transform: translate(-50%, 3px) scale(0.98);
+        transition:
+          opacity 280ms ease-out,
+          transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+        white-space: normal;
+        will-change: opacity, transform;
+      }
+
+      .word-tooltip.is-open {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+      }
+
+      .progress-wrap {
+        margin-top: auto;
+      }
+
+      .progress {
+        height: 5px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: rgba(16, 18, 20, 0.09);
+      }
+
+      .progress span {
+        display: block;
+        width: 0%;
+        height: 100%;
+        border-radius: inherit;
+        background: var(--ink);
+        transition: width 220ms ease;
+      }
+
+      .mini-meta {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+        color: rgba(16, 18, 20, 0.45);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .translation {
+        display: grid;
+        grid-template-rows: minmax(34px, auto) minmax(0, 1fr) auto;
+        min-height: 0;
+        padding: 20px 22px max(16px, env(safe-area-inset-bottom));
+        border-top: 1px solid rgba(16, 18, 20, 0.08);
+        background: rgba(255, 255, 255, 0.76);
+        box-shadow: 0 -22px 64px rgba(126, 143, 153, 0.13);
+        backdrop-filter: blur(22px);
+      }
+
+      .translation-copy {
+        display: grid;
+        min-height: 0;
+        place-items: center;
+        text-align: center;
+      }
+
+      .translation-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        color: rgba(16, 18, 20, 0.44);
+        font-size: 12px;
+        font-weight: 760;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .translation-mode {
+        display: inline-flex;
+        gap: 2px;
+        padding: 2px;
+        border-radius: 999px;
+        background: rgba(16, 18, 20, 0.06);
+        letter-spacing: 0;
+        text-transform: none;
+      }
+
+      .translation-mode button {
+        min-width: 42px;
+        padding: 5px 8px;
+        border-radius: 999px;
+        background: transparent;
+        color: rgba(16, 18, 20, 0.48);
+        font-size: 11px;
+        font-weight: 760;
+        line-height: 1;
+      }
+
+      .translation-mode button.is-selected {
+        background: rgba(255, 255, 255, 0.88);
+        color: var(--ink);
+        box-shadow: 0 4px 14px rgba(16, 18, 20, 0.08);
+      }
+
+      .translation-mode button:disabled {
+        cursor: default;
+        opacity: 0.42;
+      }
+
+      .translation p {
+        margin: 0;
+        color: rgba(16, 18, 20, 0.88);
+        font-size: clamp(23px, 6.2vw, 30px);
+        font-weight: 680;
+        letter-spacing: 0;
+        line-height: 1.16;
+        text-align: center;
+      }
+
+      .controls {
+        position: relative;
+        display: grid;
+        grid-template-columns: 52px 68px 52px;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .control {
+        display: grid;
+        place-items: center;
+        background: transparent;
+        color: var(--ink);
+        font-weight: 800;
+      }
+
+      .skip {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        color: rgba(16, 18, 20, 0.72);
+      }
+
+      .play {
+        width: 68px;
+        height: 68px;
+        border-radius: 50%;
+        background: var(--ink);
+        box-shadow: 0 17px 32px rgba(16, 18, 20, 0.18);
+      }
+
+      .speed {
+        position: absolute;
+        top: 50%;
+        left: calc(50% + 104px);
+        transform: translateY(-50%);
+        width: 50px;
+        height: 38px;
+        border-radius: 999px;
+        background: rgba(16, 18, 20, 0.06);
+        color: rgba(16, 18, 20, 0.62);
+        font-size: 15px;
+        font-weight: 760;
+      }
+
+      .lucide {
+        width: 26px;
+        height: 26px;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2.4;
+      }
+
+      .play .lucide {
+        width: 30px;
+        height: 30px;
+        color: white;
+        fill: none;
+      }
+
+      .play .pause-icon {
+        display: none;
+      }
+
+      .play.is-playing .play-icon {
+        display: none;
+      }
+
+      .play.is-playing .pause-icon {
+        display: block;
+      }
+
+      .voice-sheet {
+        position: absolute;
+        inset: 0;
+        z-index: 8;
+        display: grid;
+        align-items: end;
+        background: rgba(16, 18, 20, 0.18);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 180ms ease;
+      }
+
+      .voice-sheet.is-open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .voice-panel {
+        max-height: min(74svh, 620px);
+        overflow: hidden;
+        border-top-left-radius: 28px;
+        border-top-right-radius: 28px;
+        background: rgba(255, 255, 255, 0.93);
+        box-shadow: 0 -22px 70px rgba(65, 83, 96, 0.28);
+        backdrop-filter: blur(24px);
+        transform: translateY(18px);
+        transition: transform 180ms ease;
+      }
+
+      .voice-sheet.is-open .voice-panel {
+        transform: translateY(0);
+      }
+
+      .voice-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 20px 12px;
+      }
+
+      .voice-title {
+        margin: 0;
+        font-size: 19px;
+        font-weight: 780;
+        letter-spacing: 0;
+      }
+
+      .voice-close {
+        display: grid;
+        width: 38px;
+        height: 38px;
+        place-items: center;
+        border-radius: 50%;
+        background: rgba(16, 18, 20, 0.06);
+        color: rgba(16, 18, 20, 0.76);
+      }
+
+      .voice-list {
+        display: grid;
+        gap: 8px;
+        max-height: calc(min(74svh, 620px) - 68px);
+        overflow: auto;
+        padding: 0 14px max(18px, env(safe-area-inset-bottom));
+      }
+
+      .voice-option {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 14px;
+        width: 100%;
+        min-height: 62px;
+        padding: 12px 14px;
+        border-radius: 18px;
+        background: rgba(16, 18, 20, 0.045);
+        text-align: left;
+      }
+
+      .voice-option.is-selected {
+        background: rgba(127, 156, 175, 0.22);
+      }
+
+      .voice-name {
+        overflow: hidden;
+        color: var(--ink);
+        font-size: 16px;
+        font-weight: 740;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .voice-meta {
+        margin-top: 3px;
+        overflow: hidden;
+        color: rgba(16, 18, 20, 0.48);
+        font-size: 12px;
+        font-weight: 620;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .voice-check {
+        width: 22px;
+        height: 22px;
+        color: var(--accent-strong);
+        opacity: 0;
+      }
+
+      .voice-option.is-selected .voice-check {
+        opacity: 1;
+      }
+
+      .voice-empty {
+        padding: 24px 16px 28px;
+        color: rgba(16, 18, 20, 0.58);
+        font-size: 14px;
+        font-weight: 620;
+        line-height: 1.35;
+        text-align: center;
+      }
+
+      @media (max-height: 720px) {
+        .app {
+          grid-template-rows: minmax(0, 1.8fr) minmax(204px, 1fr);
+        }
+
+        .book-chip {
+          margin-top: 0;
+        }
+
+        .stage {
+          padding-top: 10px;
+        }
+
+        .word {
+          min-height: 40px;
+          font-size: clamp(27px, 8.6vw, 38px);
+        }
+
+        .translation {
+          padding-top: 15px;
+        }
+
+        .controls {
+          margin-top: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app" aria-label="German reading trainer">
+      <section class="reader" aria-label="German reading area">
+        <div class="book-chip" id="bookChip" aria-label="Current book">
+          <img
+            class="book-icon"
+            id="bookIcon"
+            src="data/books/moby-dick/assets/moby_dick_icon.png"
+            alt=""
+            aria-hidden="true"
+          />
+          <span id="bookChipLabel">Moby-Dick</span>
+        </div>
+
+        <div class="stage">
+          <div class="words" id="words" aria-live="polite"></div>
+        </div>
+        <div class="word-tooltip" id="wordTooltip" role="tooltip"></div>
+
+        <div class="progress-wrap" aria-label="Reading progress">
+          <div class="progress"><span id="progressFill"></span></div>
+          <div class="mini-meta">
+            <span id="elapsed">0:00</span>
+            <span id="remaining">4 phrases left</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="translation" aria-label="English translation">
+        <div class="translation-label">
+          <span>English</span>
+          <div class="translation-mode" aria-label="Translation source">
+            <button id="bookTranslationButton" type="button" aria-pressed="true">Book</button>
+            <button id="aiTranslationButton" type="button" aria-pressed="false">AI</button>
+          </div>
+          <span id="segmentCount">1 / 5</span>
+        </div>
+
+        <div class="translation-copy">
+          <p id="translationText"></p>
+        </div>
+
+        <div class="controls" aria-label="Playback controls">
+          <button class="control skip" id="prevButton" type="button" aria-label="Previous phrase">
+            <svg class="lucide" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="m15 18-6-6 6-6"></path>
+            </svg>
+          </button>
+          <button class="control play" id="playButton" type="button" aria-label="Play phrase">
+            <svg class="lucide play-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <polygon points="6 3 20 12 6 21 6 3"></polygon>
+            </svg>
+            <svg class="lucide pause-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="14" y="4" width="4" height="16" rx="1"></rect>
+              <rect x="6" y="4" width="4" height="16" rx="1"></rect>
+            </svg>
+          </button>
+          <button class="control skip" id="nextButton" type="button" aria-label="Next phrase">
+            <svg class="lucide" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="m9 18 6-6-6-6"></path>
+            </svg>
+          </button>
+          <button class="control speed" id="speedButton" type="button" aria-label="Reading speed">
+            1x
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const safePathPart = (value, fallback) =>
+        /^[a-z0-9][a-z0-9-]*$/i.test(value || "") ? value : fallback;
+      const safeManifest = (value, fallback) =>
+        /^[a-z0-9][a-z0-9-]*\.json$/i.test(value || "") ? value : fallback;
+      const BOOK_ID = safePathPart(params.get("book"), "moby-dick");
+      const MANIFEST_FILE = safeManifest(params.get("manifest"), "chapter-001.json");
+      const BOOK_DIR = `data/books/${BOOK_ID}`;
+      const PAGE_MANIFEST_URL = `${BOOK_DIR}/${MANIFEST_FILE}`;
+
+      const segments = [
+        {
+          de: "Als ich vor einigen Jahren",
+          en: "Some years ago,",
+          notes: {
+            Als: ["connector", "when / as"],
+            ich: ["pronoun", "I"],
+            vor: ["preposition", "ago / before"],
+            einigen: ["determiner", "some / a few"],
+            Jahren: ["noun", "years"],
+          },
+        },
+        {
+          de: "wie lange es genau her ist,",
+          en: "never mind how long precisely,",
+          notes: {
+            wie: ["adverb", "how"],
+            lange: ["adverb", "long"],
+            genau: ["adverb", "precisely / exactly"],
+            her: ["adverb", "ago"],
+            ist: ["verb", "is"],
+          },
+        },
+        {
+          de: "tut wenig zur Sache",
+          en: "never mind the exact date,",
+          notes: {
+            tut: ["verb", "does / matters"],
+            wenig: ["adverb", "little / not much"],
+            zur: ["contraction", "to the"],
+            Sache: ["noun", "matter / issue"],
+          },
+        },
+        {
+          de: "so gut wie nichts in der Tasche hatte",
+          en: "having little or no money in my purse,",
+          notes: {
+            gut: ["adjective", "good; here part of 'almost'"],
+            nichts: ["pronoun", "nothing"],
+            Tasche: ["noun", "pocket / purse"],
+            hatte: ["verb", "had"],
+          },
+        },
+        {
+          de: "und von einem weiteren Aufenthalt auf dem Lande",
+          en: "and nothing particular to interest me on shore,",
+          notes: {
+            und: ["conjunction", "and"],
+            weiteren: ["adjective", "further / additional"],
+            Aufenthalt: ["noun", "stay"],
+            Lande: ["noun", "land / shore"],
+          },
+        },
+        {
+          de: "nichts mehr wissen wollte,",
+          en: "and wanting no more of staying ashore,",
+          notes: {
+            nichts: ["pronoun", "nothing"],
+            mehr: ["adverb", "more / anymore"],
+            wissen: ["verb", "to know; here, to want to know"],
+            wollte: ["verb", "wanted"],
+          },
+        },
+        {
+          de: "kam ich auf den Gedanken,",
+          en: "I thought",
+          notes: {
+            kam: ["verb", "came"],
+            Gedanken: ["noun", "thought / idea"],
+            auf: ["preposition", "onto / upon"],
+          },
+        },
+        {
+          de: "ein wenig zur See zu fahren,",
+          en: "I would sail about a little,",
+          notes: {
+            ein: ["article", "a / one"],
+            wenig: ["adverb", "a little"],
+            See: ["noun", "sea"],
+            fahren: ["verb", "to travel / go"],
+          },
+        },
+        {
+          de: "um die Welt des Meeres kennenzulernen.",
+          en: "and see the watery part of the world.",
+          notes: {
+            Welt: ["noun", "world"],
+            Meeres: ["noun", "of the sea"],
+            kennenzulernen: ["verb", "to get to know / become acquainted with"],
+          },
+        },
+        {
+          de: "Man verliert auf diese Weise seinen verrückten Spleen,",
+          en: "It is a way I have of driving off the spleen,",
+          notes: {
+            Man: ["pronoun", "one / you"],
+            verliert: ["verb", "loses"],
+            Weise: ["noun", "way / manner"],
+            verrückten: ["adjective", "mad / strange"],
+            Spleen: ["noun", "spleen / melancholy"],
+          },
+        },
+      ];
+
+      const wordsEl = document.querySelector("#words");
+      const translationEl = document.querySelector("#translationText");
+      const bookTranslationButton = document.querySelector("#bookTranslationButton");
+      const aiTranslationButton = document.querySelector("#aiTranslationButton");
+      const playButton = document.querySelector("#playButton");
+      const prevButton = document.querySelector("#prevButton");
+      const nextButton = document.querySelector("#nextButton");
+      const speedButton = document.querySelector("#speedButton");
+      const bookChipLabel = document.querySelector("#bookChipLabel");
+      const bookIcon = document.querySelector("#bookIcon");
+      const readerEl = document.querySelector(".reader");
+      const progressFill = document.querySelector("#progressFill");
+      const elapsedEl = document.querySelector("#elapsed");
+      const remainingEl = document.querySelector("#remaining");
+      const segmentCountEl = document.querySelector("#segmentCount");
+      const wordTooltip = document.querySelector("#wordTooltip");
+
+      let segmentIndex = 0;
+      let currentWordIndex = -1;
+      let selectedWordIndex = null;
+      let playbackTimer = null;
+      let audioFrame = null;
+      let tooltipTimer = null;
+      let isPlaying = false;
+      let playbackToken = 0;
+      let selectedVoiceId = window.localStorage.getItem("sayso.voiceId") || "";
+      let translationMode = window.localStorage.getItem("sayso.translationMode") || "book";
+      let currentBookTitle = "Moby-Dick";
+      const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5];
+      let playbackSpeed = Number(window.localStorage.getItem("sayso.playbackSpeed")) || 1;
+      if (!SPEED_OPTIONS.includes(playbackSpeed)) playbackSpeed = 1;
+      let cachedVoiceId = "";
+      const segmentTimingCache = new Map();
+      const audioPlayer = new Audio();
+
+      function formatSpeed(speed) {
+        return `${Number.isInteger(speed) ? speed : speed.toFixed(2).replace(/0$/, "")}x`;
+      }
+
+      function updateSpeedButton() {
+        const label = formatSpeed(playbackSpeed);
+        speedButton.textContent = label;
+        speedButton.setAttribute("aria-label", `Reading speed ${label}`);
+        audioPlayer.playbackRate = playbackSpeed;
+      }
+
+      function cyclePlaybackSpeed() {
+        const index = SPEED_OPTIONS.indexOf(playbackSpeed);
+        playbackSpeed = SPEED_OPTIONS[(index + 1) % SPEED_OPTIONS.length];
+        window.localStorage.setItem("sayso.playbackSpeed", String(playbackSpeed));
+        updateSpeedButton();
+      }
+
+      function cleanWord(word) {
+        return word.replace(/[.,;:!?"“”„”—–]/g, "");
+      }
+
+      function getWords(segment) {
+        return segment.de.split(/\s+/).slice(0, 10);
+      }
+
+      function resolveBookPath(path) {
+        return path ? `${BOOK_DIR}/${path}` : "";
+      }
+
+      async function loadPageManifest() {
+        try {
+          const response = await fetch(PAGE_MANIFEST_URL);
+          if (!response.ok) throw new Error(`Page manifest failed: ${response.status}`);
+          const manifest = await response.json();
+          currentBookTitle = manifest.title || BOOK_ID;
+          document.title = `${currentBookTitle} | Say So Reader`;
+          bookChipLabel.textContent = currentBookTitle;
+          if (manifest.icon) {
+            bookIcon.src = resolveBookPath(manifest.icon);
+          } else if (BOOK_ID !== "moby-dick") {
+            bookIcon.style.display = "none";
+          }
+          cachedVoiceId = manifest.selected_voice_id || "";
+          const narrationChunks = Object.fromEntries(
+            (manifest.narration_chunks || []).map((chunk) => [chunk.id, chunk]),
+          );
+          const readingUnits = manifest.reading_units || manifest.chunks || [];
+
+          segments.splice(
+            0,
+            segments.length,
+            ...readingUnits.map((unit) => {
+              const narrationChunk = narrationChunks[unit.narration_chunk_id] || unit;
+              return {
+                id: unit.id,
+                narrationChunkId: unit.narration_chunk_id || narrationChunk.id || unit.id,
+                de: unit.display_text,
+                en: unit.en,
+                enAi: unit.en_ai || "",
+                notes: unit.notes || {},
+                audio: resolveBookPath(narrationChunk.audio || unit.audio),
+                timing: resolveBookPath(narrationChunk.timing || unit.timing),
+              };
+            }),
+          );
+
+          if (cachedVoiceId) {
+            selectedVoiceId = cachedVoiceId;
+            window.localStorage.setItem("sayso.voiceId", selectedVoiceId);
+            updateVoiceChip();
+          }
+
+          if (!isPlaying) render();
+        } catch (error) {
+          console.warn(error);
+        }
+      }
+
+      function activeTranslation(segment) {
+        if (translationMode === "ai" && segment.enAi) return segment.enAi;
+        return segment.en || segment.enAi || "";
+      }
+
+      function updateTranslationModeButtons() {
+        const bookAvailable = segments.some((segment) => segment.en);
+        const aiAvailable = segments.some((segment) => segment.enAi);
+        if (translationMode === "ai" && !aiAvailable) translationMode = "book";
+        if (translationMode === "book" && !bookAvailable && aiAvailable) translationMode = "ai";
+
+        bookTranslationButton.classList.toggle("is-selected", translationMode === "book");
+        aiTranslationButton.classList.toggle("is-selected", translationMode === "ai");
+        bookTranslationButton.setAttribute("aria-pressed", String(translationMode === "book"));
+        aiTranslationButton.setAttribute("aria-pressed", String(translationMode === "ai"));
+        bookTranslationButton.disabled = !bookAvailable;
+        aiTranslationButton.disabled = !aiAvailable;
+      }
+
+      function setTranslationMode(mode) {
+        translationMode = mode;
+        window.localStorage.setItem("sayso.translationMode", translationMode);
+        updateTranslationModeButtons();
+        render();
+      }
+
+      function render() {
+        const segment = segments[segmentIndex];
+        const words = getWords(segment);
+
+        wordsEl.innerHTML = "";
+        words.forEach((word, index) => {
+          const button = document.createElement("button");
+          button.className = "word";
+          button.type = "button";
+          button.dataset.word = word;
+          const text = document.createElement("span");
+          text.className = "word-text";
+          text.textContent = word;
+          button.appendChild(text);
+          button.setAttribute("aria-label", `Learn ${cleanWord(word)}`);
+          button.addEventListener("click", () => showLearning(index, button));
+          wordsEl.appendChild(button);
+        });
+
+        translationEl.textContent = activeTranslation(segment);
+        segmentCountEl.textContent = `${segmentIndex + 1} / ${segments.length}`;
+        remainingEl.textContent = `${segments.length - segmentIndex - 1} phrases left`;
+        elapsedEl.textContent = `0:${String(segmentIndex * 8).padStart(2, "0")}`;
+        progressFill.style.width = `${(segmentIndex / segments.length) * 100}%`;
+        currentWordIndex = -1;
+        selectedWordIndex = null;
+        hideTooltip();
+        updateTranslationModeButtons();
+        updateWordClasses();
+      }
+
+      function updateWordClasses() {
+        [...wordsEl.children].forEach((node, index) => {
+          node.classList.toggle("is-read", index < currentWordIndex);
+          node.classList.toggle("is-current", index === currentWordIndex);
+          node.classList.toggle("is-selected", index === selectedWordIndex);
+        });
+      }
+
+      function hideTooltip() {
+        window.clearTimeout(tooltipTimer);
+        wordTooltip.classList.remove("is-open");
+      }
+
+      function showLearning(index, button) {
+        const segment = segments[segmentIndex];
+        const word = getWords(segment)[index];
+        const key = cleanWord(word);
+        const note = segment.notes[key] || ["word", "Translation note will appear here."];
+
+        selectedWordIndex = index;
+        const wasOpen = wordTooltip.classList.contains("is-open");
+        wordTooltip.classList.remove("is-open");
+        window.clearTimeout(tooltipTimer);
+
+        tooltipTimer = window.setTimeout(() => {
+          wordTooltip.textContent = note[1];
+
+          const readerRect = readerEl.getBoundingClientRect();
+          const wordRect = button.getBoundingClientRect();
+          const tooltipRect = wordTooltip.getBoundingClientRect();
+          const halfTooltip = tooltipRect.width / 2;
+          const center = wordRect.left - readerRect.left + wordRect.width / 2;
+          const left = Math.max(halfTooltip + 4, Math.min(readerRect.width - halfTooltip - 4, center));
+          const top = Math.max(12, wordRect.top - readerRect.top - tooltipRect.height - 10);
+
+          wordTooltip.style.left = `${left}px`;
+          wordTooltip.style.top = `${top}px`;
+          void wordTooltip.offsetWidth;
+          requestAnimationFrame(() => wordTooltip.classList.add("is-open"));
+        }, wasOpen ? 170 : 0);
+
+        updateWordClasses();
+      }
+
+      function stopPlayback() {
+        playbackToken += 1;
+        window.clearTimeout(playbackTimer);
+        window.cancelAnimationFrame(audioFrame);
+        playbackTimer = null;
+        audioFrame = null;
+        audioPlayer.pause();
+        audioPlayer.removeAttribute("src");
+        audioPlayer.load();
+        isPlaying = false;
+        playButton.classList.remove("is-playing");
+        playButton.setAttribute("aria-label", "Play phrase");
+        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      }
+
+      function getWordRanges(text, words) {
+        let cursor = 0;
+        return words.map((word) => {
+          const start = text.indexOf(word, cursor);
+          const safeStart = start === -1 ? cursor : start;
+          cursor = safeStart + word.length;
+          return { start: safeStart, end: cursor };
+        });
+      }
+
+      function setCurrentWord(index) {
+        const words = getWords(segments[segmentIndex]);
+        currentWordIndex = Math.max(0, Math.min(words.length - 1, index));
+        updateWordClasses();
+        const phraseProgress = (currentWordIndex + 1) / words.length;
+        progressFill.style.width = `${((segmentIndex + phraseProgress) / segments.length) * 100}%`;
+      }
+
+      async function continueWithinCurrentAudio(token) {
+        const segment = segments[segmentIndex];
+        const words = getWords(segment);
+
+        try {
+          const timing = await loadSegmentTiming(segment);
+          const unitTiming = timingForSegment(timing, segment);
+          if (!unitTiming || !isPlaying || token !== playbackToken) return;
+          syncWordsFromAudio(words, unitTiming, token);
+        } catch (error) {
+          console.warn(error);
+          playCurrentSegment();
+        }
+      }
+
+      function finishCurrentSegment(token) {
+        if (!isPlaying || token !== playbackToken) return;
+
+        if (segmentIndex < segments.length - 1) {
+          const currentSegment = segments[segmentIndex];
+          const nextSegment = segments[segmentIndex + 1];
+          const canContinueCurrentAudio =
+            currentSegment.audio &&
+            nextSegment.audio &&
+            currentSegment.audio === nextSegment.audio &&
+            currentSegment.timing === nextSegment.timing &&
+            !audioPlayer.paused &&
+            !audioPlayer.ended;
+
+          segmentIndex += 1;
+          render();
+          if (canContinueCurrentAudio) {
+            continueWithinCurrentAudio(token);
+          } else {
+            playCurrentSegment();
+          }
+          return;
+        }
+
+        progressFill.style.width = "100%";
+        stopPlayback();
+      }
+
+      async function loadSegmentTiming(segment) {
+        if (!segment.timing) return null;
+        if (segmentTimingCache.has(segment.timing)) return segmentTimingCache.get(segment.timing);
+
+        const response = await fetch(segment.timing);
+        if (!response.ok) throw new Error(`Timing failed: ${response.status}`);
+        const timing = await response.json();
+        segmentTimingCache.set(segment.timing, timing);
+        return timing;
+      }
+
+      function timingForSegment(timing, segment) {
+        if (!timing) return null;
+        if (!timing.reading_units) return timing;
+        return timing.reading_units.find((unit) => unit.id === segment.id) || null;
+      }
+
+      function syncWordsFromAudio(words, unitTiming, token) {
+        if (!isPlaying || token !== playbackToken) return;
+
+        const elapsedMs = audioPlayer.currentTime * 1000;
+        if (typeof unitTiming.end_ms === "number" && elapsedMs >= unitTiming.end_ms - 12) {
+          finishCurrentSegment(token);
+          return;
+        }
+
+        const timings = unitTiming.words || [];
+        let wordIndex = -1;
+        for (let index = 0; index < timings.length; index += 1) {
+          const timing = timings[index];
+          if (elapsedMs + 24 >= timing.start_ms) wordIndex = index;
+          if (elapsedMs < timing.start_ms) break;
+        }
+
+        if (wordIndex !== -1 && wordIndex !== currentWordIndex) {
+          setCurrentWord(Math.min(wordIndex, words.length - 1));
+        }
+
+        audioFrame = window.requestAnimationFrame(() => syncWordsFromAudio(words, unitTiming, token));
+      }
+
+      async function playCachedSegment(words, token) {
+        const segment = segments[segmentIndex];
+        if (!segment.audio || !segment.timing) return false;
+        if (cachedVoiceId && selectedVoiceId && selectedVoiceId !== cachedVoiceId) return false;
+
+        try {
+          const timing = await loadSegmentTiming(segment);
+          const unitTiming = timingForSegment(timing, segment);
+          const wordTimings = (unitTiming?.words || []).filter((word) => typeof word.start_ms === "number");
+          if (!unitTiming || !wordTimings.length) return false;
+          if (!isPlaying || token !== playbackToken) return true;
+
+          const audioUrl = new URL(segment.audio, window.location.href).href;
+          const isSameAudio = audioPlayer.src === audioUrl;
+          const elapsedMs = audioPlayer.currentTime * 1000;
+          const shouldSeek =
+            !isSameAudio ||
+            audioPlayer.ended ||
+            elapsedMs < unitTiming.start_ms - 90 ||
+            elapsedMs > unitTiming.end_ms + 120;
+
+          if (!isSameAudio) {
+            audioPlayer.pause();
+            audioPlayer.src = segment.audio;
+          }
+          if (shouldSeek) {
+            audioPlayer.currentTime = Math.max(0, (unitTiming.start_ms || 0) / 1000);
+          }
+          audioPlayer.playbackRate = playbackSpeed;
+          audioPlayer.onended = () => finishCurrentSegment(token);
+          audioPlayer.onerror = () => {
+            if (!isPlaying || token !== playbackToken) return;
+            playSyntheticSegment(words, token);
+          };
+
+          if (audioPlayer.paused) await audioPlayer.play();
+          syncWordsFromAudio(words, unitTiming, token);
+          return true;
+        } catch (error) {
+          console.warn(error);
+          return false;
+        }
+      }
+
+      function speakSegment(words, token, onBoundarySync) {
+        if (!("speechSynthesis" in window)) return null;
+        window.speechSynthesis.cancel();
+        const text = segments[segmentIndex].de;
+        const ranges = getWordRanges(text, words);
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "de-DE";
+        utterance.rate = 0.9 * playbackSpeed;
+        utterance.pitch = 0.95;
+        utterance.onboundary = (event) => {
+          if (!isPlaying || token !== playbackToken || typeof event.charIndex !== "number") return;
+          const wordIndex = ranges.findIndex(
+            (range, index) =>
+              event.charIndex >= range.start &&
+              (event.charIndex < range.end || index === ranges.length - 1),
+          );
+          if (wordIndex === -1) return;
+          onBoundarySync();
+          setCurrentWord(wordIndex);
+        };
+        utterance.onend = () => finishCurrentSegment(token);
+        window.speechSynthesis.speak(utterance);
+        return utterance;
+      }
+
+      function playSyntheticSegment(words, token) {
+        let boundarySynced = false;
+        const wordMs = () => Math.max(340, Math.min(540, 2600 / words.length)) / playbackSpeed;
+
+        speakSegment(words, token, () => {
+          boundarySynced = true;
+          window.clearTimeout(playbackTimer);
+        });
+
+        function tick() {
+          if (!isPlaying || token !== playbackToken || boundarySynced) return;
+          setCurrentWord(currentWordIndex + 1);
+
+          if (currentWordIndex < words.length - 1) {
+            playbackTimer = window.setTimeout(tick, wordMs());
+            return;
+          }
+
+          playbackTimer = window.setTimeout(() => finishCurrentSegment(token), wordMs());
+        }
+
+        playbackTimer = window.setTimeout(tick, 90);
+      }
+
+      function startPlayback() {
+        isPlaying = true;
+        playButton.classList.add("is-playing");
+        playButton.setAttribute("aria-label", "Pause phrase");
+        playCurrentSegment();
+      }
+
+      async function playCurrentSegment() {
+        window.clearTimeout(playbackTimer);
+        window.cancelAnimationFrame(audioFrame);
+        playbackToken += 1;
+        const token = playbackToken;
+        currentWordIndex = -1;
+        audioFrame = null;
+        hideTooltip();
+        selectedWordIndex = null;
+        updateWordClasses();
+
+        const words = getWords(segments[segmentIndex]);
+        const usingCachedAudio = await playCachedSegment(words, token);
+        if (!usingCachedAudio && isPlaying && token === playbackToken) {
+          playSyntheticSegment(words, token);
+        }
+      }
+
+      function goToSegment(nextIndex) {
+        stopPlayback();
+        segmentIndex = Math.max(0, Math.min(segments.length - 1, nextIndex));
+        render();
+      }
+
+      function updateVoiceChip() {
+        bookChipLabel.textContent = currentBookTitle;
+      }
+
+      playButton.addEventListener("click", () => {
+        if (isPlaying) {
+          stopPlayback();
+          return;
+        }
+        startPlayback();
+      });
+
+      prevButton.addEventListener("click", () => goToSegment(segmentIndex - 1));
+      nextButton.addEventListener("click", () => goToSegment(segmentIndex + 1));
+      speedButton.addEventListener("click", cyclePlaybackSpeed);
+      bookTranslationButton.addEventListener("click", () => setTranslationMode("book"));
+      aiTranslationButton.addEventListener("click", () => setTranslationMode("ai"));
+
+      updateVoiceChip();
+      updateSpeedButton();
+      render();
+      loadPageManifest();
+    </script>
+  </body>
+</html>

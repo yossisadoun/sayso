@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Say So Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gentium+Book+Plus:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #101214;
+        --muted: #6f7478;
+        --faint: #a7adb2;
+        --line: rgba(16, 18, 20, 0.1);
+        --panel: rgba(255, 255, 255, 0.78);
+        --panel-solid: #f8f8f6;
+        --accent: #7f9caf;
+        --accent-soft: rgba(127, 156, 175, 0.2);
+        --accent-strong: #2c5870;
+        --good: #2f725f;
+        --warn: #906c24;
+        --bad: #9a3f3f;
+        --shadow: 0 24px 70px rgba(65, 83, 96, 0.18);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+        margin: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at 50% 2%, rgba(123, 157, 177, 0.54), transparent 34rem),
+          linear-gradient(180deg, #d8e1e4 0%, #faf9f6 52%, #ffffff 100%);
+        color: var(--ink);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      button {
+        -webkit-tap-highlight-color: transparent;
+        appearance: none;
+        border: 0;
+        color: inherit;
+        cursor: pointer;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .app {
+        width: min(1160px, calc(100vw - 32px));
+        margin: 0 auto;
+        padding: max(28px, env(safe-area-inset-top)) 0 max(34px, env(safe-area-inset-bottom));
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 13px 8px 8px;
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.35);
+        box-shadow: 0 10px 34px rgba(75, 96, 110, 0.1);
+        backdrop-filter: blur(18px);
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 28px;
+        height: 28px;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--ink);
+        color: white;
+        font-family: "Gentium Book Plus", Georgia, serif;
+        font-size: 17px;
+        font-weight: 700;
+      }
+
+      .brand-text {
+        color: rgba(16, 18, 20, 0.74);
+        font-size: 13px;
+        font-weight: 760;
+      }
+
+      .toplink {
+        display: inline-flex;
+        align-items: center;
+        min-height: 38px;
+        padding: 0 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.52);
+        color: rgba(16, 18, 20, 0.7);
+        font-size: 13px;
+        font-weight: 760;
+        box-shadow: 0 10px 30px rgba(75, 96, 110, 0.1);
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+
+      h1 {
+        margin: 0;
+        font-family: "Gentium Book Plus", Georgia, serif;
+        font-size: clamp(44px, 7vw, 78px);
+        font-weight: 700;
+        letter-spacing: 0;
+        line-height: 0.95;
+      }
+
+      .secret-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 30px;
+        padding: 0 11px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.56);
+        color: rgba(16, 18, 20, 0.62);
+        font-size: 12px;
+        font-weight: 760;
+      }
+
+      .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--faint);
+      }
+
+      .pill.is-ready .dot {
+        background: var(--good);
+      }
+
+      .pill.is-missing .dot {
+        background: var(--bad);
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+
+      .step {
+        min-height: 78px;
+        padding: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.62);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.5);
+        box-shadow: 0 12px 34px rgba(75, 96, 110, 0.08);
+      }
+
+      .step-index {
+        color: var(--accent-strong);
+        font-size: 11px;
+        font-weight: 820;
+      }
+
+      .step-title {
+        margin-top: 7px;
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 0.84fr 1.16fr;
+        gap: 16px;
+        align-items: start;
+      }
+
+      .panel {
+        border: 1px solid rgba(255, 255, 255, 0.66);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(22px);
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px 16px 10px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 820;
+        letter-spacing: 0;
+      }
+
+      .panel-body {
+        display: grid;
+        gap: 12px;
+        padding: 0 16px 16px;
+      }
+
+      .fields {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        color: rgba(16, 18, 20, 0.52);
+        font-size: 12px;
+        font-weight: 780;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      select {
+        width: 100%;
+        min-height: 42px;
+        padding: 0 11px;
+        border: 1px solid rgba(16, 18, 20, 0.1);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--ink);
+        outline: none;
+      }
+
+      input[type="file"] {
+        width: 100%;
+        color: rgba(16, 18, 20, 0.68);
+        font-size: 13px;
+      }
+
+      input:focus,
+      select:focus {
+        border-color: rgba(44, 88, 112, 0.4);
+        box-shadow: 0 0 0 3px rgba(127, 156, 175, 0.2);
+      }
+
+      .checkline {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: rgba(16, 18, 20, 0.64);
+        font-size: 13px;
+        font-weight: 720;
+      }
+
+      .checkline input {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--accent-strong);
+      }
+
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 0 14px;
+        border-radius: 999px;
+        background: rgba(16, 18, 20, 0.07);
+        color: rgba(16, 18, 20, 0.74);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .btn.primary {
+        background: var(--ink);
+        color: white;
+        box-shadow: 0 17px 32px rgba(16, 18, 20, 0.18);
+      }
+
+      .btn:disabled {
+        cursor: default;
+        opacity: 0.46;
+      }
+
+      .select-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: end;
+      }
+
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .metric {
+        min-height: 82px;
+        padding: 12px;
+        border-radius: 8px;
+        background: rgba(16, 18, 20, 0.045);
+      }
+
+      .metric-value {
+        color: var(--ink);
+        font-size: 24px;
+        font-weight: 820;
+        line-height: 1;
+      }
+
+      .metric-label {
+        margin-top: 8px;
+        color: rgba(16, 18, 20, 0.5);
+        font-size: 12px;
+        font-weight: 760;
+      }
+
+      .run-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .run-grid .btn {
+        width: 100%;
+        border-radius: 8px;
+      }
+
+      .audio-options {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .log {
+        min-height: 176px;
+        max-height: 360px;
+        margin: 0;
+        overflow: auto;
+        padding: 14px;
+        border-radius: 8px;
+        background: rgba(12, 14, 16, 0.92);
+        color: rgba(255, 255, 255, 0.86);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+        line-height: 1.45;
+        white-space: pre-wrap;
+      }
+
+      .empty {
+        padding: 18px;
+        border-radius: 8px;
+        background: rgba(16, 18, 20, 0.045);
+        color: rgba(16, 18, 20, 0.56);
+        font-size: 13px;
+        font-weight: 680;
+      }
+
+      @media (max-width: 940px) {
+        .grid,
+        .hero {
+          grid-template-columns: 1fr;
+        }
+
+        .secret-strip {
+          justify-content: flex-start;
+        }
+
+        .flow {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .app {
+          width: min(100vw - 20px, 480px);
+          padding-top: 16px;
+        }
+
+        .topbar,
+        .select-row,
+        .fields,
+        .audio-options {
+          grid-template-columns: 1fr;
+        }
+
+        .topbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .flow,
+        .metric-grid,
+        .run-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        h1 {
+          font-size: 48px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app" aria-label="Say So admin">
+      <div class="topbar">
+        <a class="brand" href="/admin" aria-label="Say So admin home">
+          <span class="brand-mark">S</span>
+          <span class="brand-text">Say So Admin</span>
+        </a>
+        <a class="toplink" id="readerTopLink" href="/index.html">Reader</a>
+      </div>
+
+      <section class="hero" aria-label="Admin heading">
+        <h1>Book pipeline</h1>
+        <div class="secret-strip" id="secretStrip">
+          <span class="pill"><span class="dot"></span>OpenAI</span>
+          <span class="pill"><span class="dot"></span>ElevenLabs</span>
+        </div>
+      </section>
+
+      <section class="flow" aria-label="Processing order">
+        <div class="step"><div class="step-index">01</div><div class="step-title">Upload</div></div>
+        <div class="step"><div class="step-index">02</div><div class="step-title">Segment</div></div>
+        <div class="step"><div class="step-index">03</div><div class="step-title">Narration chunks</div></div>
+        <div class="step"><div class="step-index">04</div><div class="step-title">Learner AI</div></div>
+        <div class="step"><div class="step-index">05</div><div class="step-title">Expressive TTS</div></div>
+        <div class="step"><div class="step-index">06</div><div class="step-title">Audio cache</div></div>
+      </section>
+
+      <div class="grid">
+        <section class="panel" aria-label="Upload book text">
+          <div class="panel-header">
+            <h2>Upload</h2>
+          </div>
+          <form class="panel-body" id="uploadForm">
+            <div class="fields">
+              <label>
+                Title
+                <input id="titleInput" type="text" value="Moby-Dick" autocomplete="off" />
+              </label>
+              <label>
+                Book id
+                <input id="bookIdInput" type="text" value="moby-dick" autocomplete="off" />
+              </label>
+              <label>
+                Manifest
+                <input id="manifestInput" type="text" value="page-001.json" autocomplete="off" />
+              </label>
+              <label>
+                Words per unit
+                <input id="maxWordsInput" type="number" min="4" max="18" value="10" />
+              </label>
+            </div>
+            <label>
+              German source
+              <input id="germanFileInput" type="file" accept=".txt,text/plain" />
+            </label>
+            <label>
+              English source
+              <input id="englishFileInput" type="file" accept=".txt,text/plain" />
+            </label>
+            <label class="checkline">
+              <input id="replaceInput" type="checkbox" />
+              Replace selected manifest
+            </label>
+            <div class="button-row">
+              <button class="btn primary" id="uploadButton" type="submit">Create manifest</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel" aria-label="Processing controls">
+          <div class="panel-header">
+            <h2>Process</h2>
+          </div>
+          <div class="panel-body">
+            <div class="select-row">
+              <label>
+                Book
+                <select id="bookSelect"></select>
+              </label>
+              <label>
+                Manifest
+                <select id="manifestSelect"></select>
+              </label>
+              <a class="btn" id="readerLink" href="/index.html">Preview</a>
+            </div>
+
+            <div class="metric-grid" id="metricGrid"></div>
+
+            <div class="fields">
+              <label>
+                Chunk max chars
+                <input id="maxCharsInput" type="number" min="400" max="2800" value="2800" />
+              </label>
+              <label class="checkline">
+                <input id="forceInput" type="checkbox" />
+                Force regeneration
+              </label>
+            </div>
+
+            <div class="run-grid">
+              <button class="btn" type="button" data-step="narration-chunks">Build chunks</button>
+              <button class="btn" type="button" data-step="translations">Translations</button>
+              <button class="btn" type="button" data-step="word-notes">Word notes</button>
+              <button class="btn" type="button" data-step="expressive">Expressive text</button>
+              <button class="btn" type="button" data-step="all">All OpenAI</button>
+              <button class="btn primary" type="button" data-step="audio">Generate audio</button>
+            </div>
+
+            <div class="audio-options">
+              <label>
+                Voice id
+                <input id="voiceIdInput" type="text" list="voiceList" autocomplete="off" />
+                <datalist id="voiceList"></datalist>
+              </label>
+              <label>
+                Model id
+                <input id="modelIdInput" type="text" placeholder="auto" autocomplete="off" />
+              </label>
+              <label>
+                Chunk id
+                <input id="chunkIdInput" type="text" placeholder="all" autocomplete="off" />
+              </label>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section class="panel" style="margin-top: 16px" aria-label="Processing log">
+        <div class="panel-header">
+          <h2>Log</h2>
+          <button class="btn" id="refreshButton" type="button">Refresh</button>
+        </div>
+        <div class="panel-body">
+          <pre class="log" id="logOutput">Ready.</pre>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const state = {
+        books: [],
+        selectedBookId: "",
+        selectedManifest: "",
+        germanText: "",
+        englishText: "",
+        busy: false,
+      };
+
+      const els = {
+        secretStrip: document.querySelector("#secretStrip"),
+        titleInput: document.querySelector("#titleInput"),
+        bookIdInput: document.querySelector("#bookIdInput"),
+        manifestInput: document.querySelector("#manifestInput"),
+        maxWordsInput: document.querySelector("#maxWordsInput"),
+        germanFileInput: document.querySelector("#germanFileInput"),
+        englishFileInput: document.querySelector("#englishFileInput"),
+        replaceInput: document.querySelector("#replaceInput"),
+        uploadForm: document.querySelector("#uploadForm"),
+        uploadButton: document.querySelector("#uploadButton"),
+        bookSelect: document.querySelector("#bookSelect"),
+        manifestSelect: document.querySelector("#manifestSelect"),
+        metricGrid: document.querySelector("#metricGrid"),
+        maxCharsInput: document.querySelector("#maxCharsInput"),
+        forceInput: document.querySelector("#forceInput"),
+        voiceIdInput: document.querySelector("#voiceIdInput"),
+        modelIdInput: document.querySelector("#modelIdInput"),
+        chunkIdInput: document.querySelector("#chunkIdInput"),
+        voiceList: document.querySelector("#voiceList"),
+        logOutput: document.querySelector("#logOutput"),
+        refreshButton: document.querySelector("#refreshButton"),
+        readerLink: document.querySelector("#readerLink"),
+        readerTopLink: document.querySelector("#readerTopLink"),
+      };
+
+      let bookIdTouched = false;
+
+      function slugify(value) {
+        return value
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+          .slice(0, 80);
+      }
+
+      function setBusy(isBusy) {
+        state.busy = isBusy;
+        document.querySelectorAll("button").forEach((button) => {
+          button.disabled = isBusy;
+        });
+      }
+
+      function log(message) {
+        els.logOutput.textContent = message || "Done.";
+      }
+
+      async function api(path, options = {}) {
+        const response = await fetch(path, {
+          ...options,
+          headers: {
+            "Content-Type": "application/json",
+            ...(options.headers || {}),
+          },
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || data.output || `Request failed: ${response.status}`);
+        }
+        return data;
+      }
+
+      function selectedBook() {
+        return state.books.find((book) => book.book_id === state.selectedBookId) || null;
+      }
+
+      function selectedManifest() {
+        const book = selectedBook();
+        if (!book) return null;
+        return book.manifests.find((manifest) => manifest.name === state.selectedManifest) || null;
+      }
+
+      function renderSecrets(secrets = {}) {
+        els.secretStrip.innerHTML = ["openai", "elevenlabs"]
+          .map((key) => {
+            const label = key === "openai" ? "OpenAI" : "ElevenLabs";
+            const ready = Boolean(secrets[key]);
+            return `<span class="pill ${ready ? "is-ready" : "is-missing"}"><span class="dot"></span>${label}</span>`;
+          })
+          .join("");
+      }
+
+      function renderSelectors() {
+        els.bookSelect.innerHTML = state.books
+          .map((book) => `<option value="${book.book_id}">${book.title || book.book_id}</option>`)
+          .join("");
+        els.bookSelect.value = state.selectedBookId;
+
+        const book = selectedBook();
+        const manifests = book?.manifests || [];
+        els.manifestSelect.innerHTML = manifests
+          .map((manifest) => `<option value="${manifest.name}">${manifest.name}</option>`)
+          .join("");
+        els.manifestSelect.value = state.selectedManifest;
+      }
+
+      function metric(value, label) {
+        return `
+          <div class="metric">
+            <div class="metric-value">${value}</div>
+            <div class="metric-label">${label}</div>
+          </div>
+        `;
+      }
+
+      function renderStatus() {
+        const manifest = selectedManifest();
+        if (!manifest) {
+          els.metricGrid.innerHTML = '<div class="empty">No manifest selected.</div>';
+          els.readerLink.href = "/index.html";
+          els.readerTopLink.href = "/index.html";
+          return;
+        }
+
+        if (manifest.selected_voice_id && !els.voiceIdInput.value) {
+          els.voiceIdInput.value = manifest.selected_voice_id;
+        }
+
+        els.metricGrid.innerHTML = [
+          metric(manifest.reading_units || 0, "Reading units"),
+          metric(`${manifest.translated_units || 0}/${manifest.reading_units || 0}`, "Translations"),
+          metric(`${manifest.noted_units || 0}/${manifest.reading_units || 0}`, "Word notes"),
+          metric(`${manifest.audio_chunks || 0}/${manifest.narration_chunks || 0}`, "Audio chunks"),
+        ].join("");
+
+        els.readerLink.href = manifest.reader_url;
+        els.readerTopLink.href = manifest.reader_url;
+      }
+
+      function paidActionMessage(step) {
+        const labels = {
+          translations: "generate learner translations with OpenAI",
+          "word-notes": "generate word notes with OpenAI",
+          expressive: "generate expressive TTS text with OpenAI",
+          all: "run all OpenAI preprocessing",
+          audio: "generate ElevenLabs audio",
+        };
+        if (!labels[step]) return "";
+
+        const target = `${state.selectedBookId}/${state.selectedManifest}`;
+        return `This will ${labels[step]} for ${target} and may use paid API credits. Continue?`;
+      }
+
+      function confirmPaidAction(step) {
+        const message = paidActionMessage(step);
+        return !message || window.confirm(message);
+      }
+
+      function renderBooks(data) {
+        state.books = data.books || [];
+        renderSecrets(data.secrets || {});
+
+        if (!state.selectedBookId || !state.books.some((book) => book.book_id === state.selectedBookId)) {
+          state.selectedBookId = state.books[0]?.book_id || "";
+        }
+
+        const book = selectedBook();
+        const manifests = book?.manifests || [];
+        if (!state.selectedManifest || !manifests.some((manifest) => manifest.name === state.selectedManifest)) {
+          state.selectedManifest = manifests[0]?.name || "";
+        }
+
+        renderSelectors();
+        renderStatus();
+      }
+
+      async function refreshBooks() {
+        const data = await api("/api/admin/books");
+        renderBooks(data);
+      }
+
+      async function readTextFile(input) {
+        const file = input.files?.[0];
+        if (!file) return "";
+        return file.text();
+      }
+
+      async function createBook(event) {
+        event.preventDefault();
+        setBusy(true);
+        log("Creating manifest...");
+        try {
+          state.germanText = await readTextFile(els.germanFileInput);
+          state.englishText = await readTextFile(els.englishFileInput);
+          const payload = {
+            title: els.titleInput.value.trim(),
+            book_id: slugify(els.bookIdInput.value.trim()),
+            manifest: els.manifestInput.value.trim(),
+            max_words: Number(els.maxWordsInput.value) || 10,
+            german_text: state.germanText,
+            english_text: state.englishText,
+            replace: els.replaceInput.checked,
+          };
+          const data = await api("/api/admin/books", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          });
+          state.selectedBookId = data.book.book_id;
+          state.selectedManifest = data.manifest.name;
+          log(`Created ${data.book.book_id}/${data.manifest.name}\n${data.manifest.reading_units} reading units`);
+          await refreshBooks();
+        } catch (error) {
+          log(error.message);
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      async function runStep(step) {
+        const manifest = selectedManifest();
+        if (!manifest) return;
+
+        setBusy(true);
+        log(`Running ${step}...`);
+        try {
+          const payload = {
+            step,
+            book_id: state.selectedBookId,
+            manifest: state.selectedManifest,
+            max_chars: Number(els.maxCharsInput.value) || 2800,
+            force: els.forceInput.checked,
+            voice_id: els.voiceIdInput.value.trim(),
+            model_id: els.modelIdInput.value.trim(),
+            chunk_id: els.chunkIdInput.value.trim(),
+          };
+          const data = await api("/api/admin/run", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          });
+          log(`${data.output || "Done."}\n\n${data.duration_seconds}s`);
+          await refreshBooks();
+        } catch (error) {
+          log(error.message);
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      async function loadVoices() {
+        try {
+          const response = await fetch("/api/voices");
+          if (!response.ok) return;
+          const data = await response.json();
+          els.voiceList.innerHTML = (data.voices || [])
+            .map((voice) => `<option value="${voice.voice_id}">${voice.name}</option>`)
+            .join("");
+        } catch (error) {
+          console.warn(error);
+        }
+      }
+
+      els.titleInput.addEventListener("input", () => {
+        if (!bookIdTouched) els.bookIdInput.value = slugify(els.titleInput.value);
+      });
+      els.bookIdInput.addEventListener("input", () => {
+        bookIdTouched = true;
+      });
+      els.uploadForm.addEventListener("submit", createBook);
+      els.bookSelect.addEventListener("change", () => {
+        state.selectedBookId = els.bookSelect.value;
+        state.selectedManifest = selectedBook()?.manifests?.[0]?.name || "";
+        renderSelectors();
+        renderStatus();
+      });
+      els.manifestSelect.addEventListener("change", () => {
+        state.selectedManifest = els.manifestSelect.value;
+        renderStatus();
+      });
+      els.refreshButton.addEventListener("click", async () => {
+        setBusy(true);
+        try {
+          await refreshBooks();
+          log("Refreshed.");
+        } finally {
+          setBusy(false);
+        }
+      });
+      document.querySelectorAll("[data-step]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const step = button.dataset.step;
+          if (!confirmPaidAction(step)) {
+            log("Cancelled.");
+            return;
+          }
+          runStep(step);
+        });
+      });
+
+      refreshBooks().catch((error) => log(error.message));
+      loadVoices();
+    </script>
+  </body>
+</html>

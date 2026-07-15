@@ -1,0 +1,306 @@
+{
+  "book_id": "moby-dick",
+  "title": "Moby-Dick",
+  "page_id": "page-001",
+  "source": {
+    "de": "source/de.txt",
+    "en": "source/en.txt"
+  },
+  "audio_dir": "audio/page-001",
+  "default_model_id": "eleven_multilingual_v2",
+  "expressive_model_id": "eleven_v3",
+  "selected_voice_id": "JBFqnCBsd6RMkjVDRZzb",
+  "selected_model_id": "eleven_v3",
+  "openai_preprocessing": {
+    "model": "gpt-4.1-mini",
+    "prompts": {
+      "learner_translation": "prompts/learner-translation.md",
+      "expressive_tts": "prompts/elevenlabs-expressive-tts.md"
+    },
+    "fields": [
+      "en_ai",
+      "narration_chunks.tts_text"
+    ]
+  },
+  "reading_units": [
+    {
+      "id": "unit-001",
+      "display_text": "Als ich vor einigen Jahren",
+      "en": "Some years ago,",
+      "en_ai": "Some years ago,",
+      "notes": {
+        "Als": [
+          "connector",
+          "when / as"
+        ],
+        "ich": [
+          "pronoun",
+          "I"
+        ],
+        "vor": [
+          "preposition",
+          "ago / before"
+        ],
+        "einigen": [
+          "determiner",
+          "some / a few"
+        ],
+        "Jahren": [
+          "noun",
+          "years"
+        ]
+      },
+      "narration_chunk_id": "narration-001"
+    },
+    {
+      "id": "unit-002",
+      "display_text": "wie lange es genau her ist,",
+      "en": "never mind how long precisely,",
+      "en_ai": "how long exactly it is ago, does not matter,",
+      "notes": {
+        "wie": [
+          "adverb",
+          "how"
+        ],
+        "lange": [
+          "adverb",
+          "long"
+        ],
+        "genau": [
+          "adverb",
+          "precisely / exactly"
+        ],
+        "her": [
+          "adverb",
+          "ago"
+        ],
+        "ist": [
+          "verb",
+          "is"
+        ]
+      },
+      "narration_chunk_id": "narration-001"
+    },
+    {
+      "id": "unit-003",
+      "display_text": "tut wenig zur Sache",
+      "en": "never mind the exact date,",
+      "en_ai": "matters little,",
+      "notes": {
+        "tut": [
+          "verb",
+          "does / matters"
+        ],
+        "wenig": [
+          "adverb",
+          "little / not much"
+        ],
+        "zur": [
+          "contraction",
+          "to the"
+        ],
+        "Sache": [
+          "noun",
+          "matter / issue"
+        ]
+      },
+      "narration_chunk_id": "narration-001"
+    },
+    {
+      "id": "unit-004",
+      "display_text": "so gut wie nichts in der Tasche hatte",
+      "en": "having little or no money in my purse,",
+      "en_ai": "with as good as nothing in the pocket,",
+      "notes": {
+        "gut": [
+          "adjective",
+          "good; here part of 'almost'"
+        ],
+        "nichts": [
+          "pronoun",
+          "nothing"
+        ],
+        "Tasche": [
+          "noun",
+          "pocket / purse"
+        ],
+        "hatte": [
+          "verb",
+          "had"
+        ]
+      },
+      "narration_chunk_id": "narration-001"
+    },
+    {
+      "id": "unit-005",
+      "display_text": "und von einem weiteren Aufenthalt auf dem Lande",
+      "en": "and nothing particular to interest me on shore,",
+      "en_ai": "and from a further stay in the country,",
+      "notes": {
+        "und": [
+          "conjunction",
+          "and"
+        ],
+        "weiteren": [
+          "adjective",
+          "further / additional"
+        ],
+        "Aufenthalt": [
+          "noun",
+          "stay"
+        ],
+        "Lande": [
+          "noun",
+          "land / shore"
+        ]
+      },
+      "narration_chunk_id": "narration-001"
+    },
+    {
+      "id": "unit-006",
+      "display_text": "nichts mehr wissen wollte,",
+      "en": "and wanting no more of staying ashore,",
+      "en_ai": "wanted to know nothing more,",
+      "notes": {
+        "nichts": [
+          "pronoun",
+          "nothing"
+        ],
+        "mehr": [
+          "adverb",
+          "more / anymore"
+        ],
+        "wissen": [
+          "verb",
+          "to know; here, to want to know"
+        ],
+        "wollte": [
+          "verb",
+          "wanted"
+        ]
+      },
+      "narration_chunk_id": "narration-001"
+    },
+    {
+      "id": "unit-007",
+      "display_text": "kam ich auf den Gedanken,",
+      "en": "I thought",
+      "en_ai": "I came upon the thought,",
+      "notes": {
+        "kam": [
+          "verb",
+          "came"
+        ],
+        "Gedanken": [
+          "noun",
+          "thought / idea"
+        ],
+        "auf": [
+          "preposition",
+          "onto / upon"
+        ]
+      },
+      "narration_chunk_id": "narration-001"
+    },
+    {
+      "id": "unit-008",
+      "display_text": "ein wenig zur See zu fahren,",
+      "en": "I would sail about a little,",
+      "en_ai": "to go a little to sea,",
+      "notes": {
+        "ein": [
+          "article",
+          "a / one"
+        ],
+        "wenig": [
+          "adverb",
+          "a little"
+        ],
+        "See": [
+          "noun",
+          "sea"
+        ],
+        "fahren": [
+          "verb",
+          "to travel / go"
+        ]
+      },
+      "narration_chunk_id": "narration-001"
+    },
+    {
+      "id": "unit-009",
+      "display_text": "um die Welt des Meeres kennenzulernen.",
+      "en": "and see the watery part of the world.",
+      "en_ai": "to get to know the world of the sea.",
+      "notes": {
+        "Welt": [
+          "noun",
+          "world"
+        ],
+        "Meeres": [
+          "noun",
+          "of the sea"
+        ],
+        "kennenzulernen": [
+          "verb",
+          "to get to know / become acquainted with"
+        ]
+      },
+      "narration_chunk_id": "narration-001"
+    },
+    {
+      "id": "unit-010",
+      "display_text": "Man verliert auf diese Weise seinen verrückten Spleen,",
+      "en": "It is a way I have of driving off the spleen,",
+      "en_ai": "One loses in this manner one’s crazy spleen,",
+      "notes": {
+        "Man": [
+          "pronoun",
+          "one / you"
+        ],
+        "verliert": [
+          "verb",
+          "loses"
+        ],
+        "Weise": [
+          "noun",
+          "way / manner"
+        ],
+        "verrückten": [
+          "adjective",
+          "mad / strange"
+        ],
+        "Spleen": [
+          "noun",
+          "spleen / melancholy"
+        ]
+      },
+      "narration_chunk_id": "narration-001"
+    }
+  ],
+  "narration_chunks": [
+    {
+      "id": "narration-001",
+      "reading_unit_ids": [
+        "unit-001",
+        "unit-002",
+        "unit-003",
+        "unit-004",
+        "unit-005",
+        "unit-006",
+        "unit-007",
+        "unit-008",
+        "unit-009",
+        "unit-010"
+      ],
+      "display_text": "Als ich vor einigen Jahren wie lange es genau her ist, tut wenig zur Sache so gut wie nichts in der Tasche hatte und von einem weiteren Aufenthalt auf dem Lande nichts mehr wissen wollte, kam ich auf den Gedanken, ein wenig zur See zu fahren, um die Welt des Meeres kennenzulernen. Man verliert auf diese Weise seinen verrückten Spleen,",
+      "tts_text": "[thoughtfully] Als ich vor einigen Jahren wie lange es genau her ist, tut wenig zur Sache so gut wie nichts in der Tasche hatte und von einem weiteren Aufenthalt auf dem Lande nichts mehr wissen wollte, kam ich auf den Gedanken, ein wenig zur See zu fahren, um die Welt des Meeres kennenzulernen. [calmly] Man verliert auf diese Weise seinen verrückten Spleen,",
+      "audio": "audio/page-001/narration-001.mp3",
+      "timing": "audio/page-001/narration-001.json"
+    }
+  ],
+  "narration_chunking": {
+    "max_chars": 2800,
+    "prompt": "prompts/narration-chunking.md"
+  }
+}
