@@ -254,6 +254,9 @@
       }
 
       .translation {
+        position: relative;
+        z-index: 1;
+        isolation: isolate;
         display: grid;
         grid-template-rows: minmax(34px, auto) minmax(0, 1fr) auto;
         min-height: 0;
@@ -261,6 +264,19 @@
         border-top: 1px solid rgba(16, 18, 20, 0.08);
         background: rgba(255, 255, 255, 0.76);
         box-shadow: 0 -22px 64px rgba(126, 143, 153, 0.13);
+        backdrop-filter: blur(22px);
+      }
+
+      .translation::after {
+        content: "";
+        position: fixed;
+        z-index: -1;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: calc(40vh + env(safe-area-inset-bottom));
+        pointer-events: none;
+        background: rgba(255, 255, 255, 0.76);
         backdrop-filter: blur(22px);
       }
 
