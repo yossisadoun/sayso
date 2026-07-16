@@ -378,11 +378,31 @@
 
       .mini-meta {
         display: flex;
+        align-items: center;
         justify-content: space-between;
         margin-top: 10px;
         color: rgba(16, 18, 20, 0.45);
         font-size: 13px;
         font-weight: 600;
+      }
+
+      .remaining-button {
+        padding: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        font-weight: inherit;
+        text-align: right;
+      }
+
+      .remaining-button:active {
+        transform: translateY(1px);
+      }
+
+      .remaining-button:focus-visible {
+        border-radius: 6px;
+        outline: 2px solid rgba(44, 88, 112, 0.36);
+        outline-offset: 4px;
       }
 
       .translation {
@@ -476,7 +496,7 @@
       .translation p {
         margin: 0;
         color: rgba(16, 18, 20, 0.66);
-        font-size: clamp(21px, 5.4vw, 27px);
+        font-size: clamp(17px, 4.3vw, 22px);
         font-weight: 520;
         letter-spacing: 0;
         line-height: 1.16;
@@ -484,27 +504,27 @@
       }
 
       .translation p.is-long {
-        font-size: clamp(17px, 4.3vw, 22px);
+        font-size: clamp(14px, 3.4vw, 18px);
         line-height: 1.14;
       }
 
       .translation p.is-very-long {
-        font-size: clamp(15px, 3.7vw, 19px);
+        font-size: clamp(12px, 3vw, 15px);
         line-height: 1.12;
       }
 
       .app.is-compact .stage > .translation-copy p {
         color: rgba(16, 18, 20, 0.46);
-        font-size: clamp(29px, 7.6vw, 38px);
+        font-size: clamp(23px, 6.1vw, 30px);
         font-weight: 430;
       }
 
       .app.is-compact .stage > .translation-copy p.is-long {
-        font-size: clamp(24px, 6vw, 31px);
+        font-size: clamp(19px, 4.8vw, 25px);
       }
 
       .app.is-compact .stage > .translation-copy p.is-very-long {
-        font-size: clamp(21px, 5.2vw, 27px);
+        font-size: clamp(17px, 4.2vw, 22px);
       }
 
       .controls {
@@ -773,7 +793,15 @@
         min-width: 0;
       }
 
+      .word-history-heading {
+        color: var(--ink);
+        font-size: 17px;
+        font-weight: 780;
+        line-height: 1.18;
+      }
+
       .word-history-sentence {
+        margin-top: 8px;
         color: rgba(16, 18, 20, 0.78);
         font-family: "Gentium Book Plus", Georgia, serif;
         font-size: 19px;
@@ -790,7 +818,7 @@
 
       .word-history-translation,
       .word-history-sentence-translation {
-        margin-top: 8px;
+        margin-top: 5px;
         color: rgba(16, 18, 20, 0.58);
         font-size: 13px;
         font-weight: 640;
@@ -843,6 +871,62 @@
         font-weight: 620;
         line-height: 1.35;
         text-align: center;
+      }
+
+      .toc-item {
+        grid-template-columns: 46px minmax(0, 1fr);
+        min-height: 72px;
+        cursor: pointer;
+      }
+
+      .toc-item.is-current {
+        background: rgba(127, 156, 175, 0.24);
+      }
+
+      .toc-index {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.72);
+        color: rgba(16, 18, 20, 0.58);
+        font-size: 12px;
+        font-weight: 820;
+      }
+
+      .toc-item.is-current .toc-index {
+        background: var(--ink);
+        color: rgba(255, 255, 255, 0.94);
+      }
+
+      .toc-copy {
+        min-width: 0;
+      }
+
+      .toc-phrase {
+        display: block;
+        overflow: hidden;
+        color: rgba(16, 18, 20, 0.78);
+        font-family: "Gentium Book Plus", Georgia, serif;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0;
+        line-height: 1.18;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .toc-translation {
+        display: block;
+        margin-top: 5px;
+        overflow: hidden;
+        color: rgba(16, 18, 20, 0.5);
+        font-size: 12px;
+        font-weight: 620;
+        line-height: 1.24;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       @media (max-height: 720px) {
@@ -913,7 +997,15 @@
           <div class="progress"><span id="progressFill"></span></div>
           <div class="mini-meta">
             <span id="elapsed">0:00</span>
-            <span id="remaining">4 phrases left</span>
+            <button
+              class="remaining-button"
+              id="remaining"
+              type="button"
+              aria-haspopup="dialog"
+              aria-expanded="false"
+            >
+              4 phrases left
+            </button>
           </div>
         </div>
       </section>
@@ -990,6 +1082,21 @@
             </button>
           </div>
           <div class="voice-list" id="wordHistoryList"></div>
+        </div>
+      </section>
+
+      <section class="voice-sheet" id="tocSheet" aria-hidden="true">
+        <div class="voice-panel" role="dialog" aria-modal="true" aria-labelledby="tocTitle">
+          <div class="voice-header">
+            <h2 class="voice-title" id="tocTitle">Contents</h2>
+            <button class="voice-close" id="tocClose" type="button" aria-label="Close contents">
+              <svg class="lucide" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M18 6 6 18"></path>
+                <path d="m6 6 12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="voice-list" id="tocList"></div>
         </div>
       </section>
 
@@ -1138,6 +1245,9 @@
       const wordHistorySheet = document.querySelector("#wordHistorySheet");
       const wordHistoryClose = document.querySelector("#wordHistoryClose");
       const wordHistoryList = document.querySelector("#wordHistoryList");
+      const tocSheet = document.querySelector("#tocSheet");
+      const tocClose = document.querySelector("#tocClose");
+      const tocList = document.querySelector("#tocList");
       const openingScreen = document.querySelector("#openingScreen");
       const openingBook = document.querySelector("#openingBook");
       const openingTypedText = document.querySelector("#openingTypedText");
@@ -1502,18 +1612,19 @@
 
           const copy = document.createElement("div");
           copy.className = "word-history-copy";
+          const wordHeading = document.createElement("div");
+          wordHeading.className = "word-history-heading";
+          wordHeading.textContent = entry.word;
           const sentence = document.createElement("div");
           sentence.className = "word-history-sentence";
           appendSentenceWithHighlight(sentence, phrase, entry.word, wordIndex);
           const wordTranslation = document.createElement("div");
           wordTranslation.className = "word-history-translation";
-          const wordLabel = document.createElement("strong");
-          wordLabel.textContent = entry.word;
-          wordTranslation.append(wordLabel, ` - ${entry.translation}`);
+          wordTranslation.textContent = entry.translation;
           const sentenceCopy = document.createElement("div");
           sentenceCopy.className = "word-history-sentence-translation";
           sentenceCopy.textContent = sentenceTranslation;
-          copy.append(sentence, wordTranslation);
+          copy.append(wordHeading, wordTranslation, sentence);
           if (sentenceTranslation) copy.appendChild(sentenceCopy);
 
           const play = document.createElement("button");
@@ -1549,6 +1660,65 @@
         wordHistorySheet.setAttribute("aria-hidden", "true");
         bookChip.setAttribute("aria-expanded", "false");
         bookChip.focus({ preventScroll: true });
+      }
+
+      function renderToc() {
+        tocList.innerHTML = "";
+
+        if (!segments.length) {
+          const empty = document.createElement("div");
+          empty.className = "voice-empty";
+          empty.textContent = "No phrases are available yet.";
+          tocList.appendChild(empty);
+          return;
+        }
+
+        segments.forEach((segment, index) => {
+          const item = document.createElement("button");
+          item.className = "voice-option toc-item";
+          item.type = "button";
+          item.classList.toggle("is-current", index === segmentIndex);
+          if (index === segmentIndex) item.setAttribute("aria-current", "true");
+
+          const marker = document.createElement("span");
+          marker.className = "toc-index";
+          marker.textContent = index + 1;
+
+          const copy = document.createElement("span");
+          copy.className = "toc-copy";
+          const phrase = document.createElement("span");
+          phrase.className = "toc-phrase";
+          phrase.textContent = index === 0 ? `Start: ${segment.de}` : segment.de;
+          const translation = document.createElement("span");
+          translation.className = "toc-translation";
+          translation.textContent = activeTranslation(segment);
+          copy.append(phrase, translation);
+
+          item.append(marker, copy);
+          item.addEventListener("click", () => {
+            closeToc(false);
+            goToSegment(index);
+            remainingEl.focus({ preventScroll: true });
+          });
+          tocList.appendChild(item);
+        });
+      }
+
+      function openToc() {
+        if (isPlaying) pausePlayback();
+        saveReadingPosition();
+        renderToc();
+        tocSheet.classList.add("is-open");
+        tocSheet.setAttribute("aria-hidden", "false");
+        remainingEl.setAttribute("aria-expanded", "true");
+        tocClose.focus({ preventScroll: true });
+      }
+
+      function closeToc(restoreFocus = true) {
+        tocSheet.classList.remove("is-open");
+        tocSheet.setAttribute("aria-hidden", "true");
+        remainingEl.setAttribute("aria-expanded", "false");
+        if (restoreFocus) remainingEl.focus({ preventScroll: true });
       }
 
       function playHistoryEntry(entry) {
@@ -1700,7 +1870,9 @@
         translationEl.classList.toggle("is-long", translation.length > 86);
         translationEl.classList.toggle("is-very-long", translation.length > 150);
         segmentCountEl.textContent = `${segmentIndex + 1} / ${segments.length}`;
-        remainingEl.textContent = `${segments.length - segmentIndex - 1} phrases left`;
+        const remainingCount = segments.length - segmentIndex - 1;
+        remainingEl.textContent = `${remainingCount} phrase${remainingCount === 1 ? "" : "s"} left`;
+        remainingEl.setAttribute("aria-label", `Open contents, ${remainingEl.textContent}`);
         updateProgressFromElapsed(segmentStartMs(segmentIndex));
         currentWordIndex = -1;
         selectedWordIndex = null;
@@ -2261,13 +2433,21 @@
       standardLayoutButton.addEventListener("click", () => enterReader("standard"));
       compactLayoutButton.addEventListener("click", () => enterReader("compact"));
       bookChip.addEventListener("click", openWordHistory);
+      remainingEl.addEventListener("click", openToc);
       wordHistoryClose.addEventListener("click", closeWordHistory);
       wordHistorySheet.addEventListener("click", (event) => {
         if (event.target === wordHistorySheet) closeWordHistory();
       });
+      tocClose.addEventListener("click", () => closeToc());
+      tocSheet.addEventListener("click", (event) => {
+        if (event.target === tocSheet) closeToc();
+      });
       window.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && wordHistorySheet.classList.contains("is-open")) {
+        if (event.key !== "Escape") return;
+        if (wordHistorySheet.classList.contains("is-open")) {
           closeWordHistory();
+        } else if (tocSheet.classList.contains("is-open")) {
+          closeToc();
         }
       });
 
