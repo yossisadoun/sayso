@@ -1427,13 +1427,13 @@
         {
           book_id: "moby-dick",
           title: "Moby-Dick",
-          reader_url: "/index.html?book=moby-dick&manifest=chapter-001.json",
+          reader_url: "index.html?book=moby-dick&manifest=chapter-001.json",
           icon: "data/books/moby-dick/assets/moby_dick_icon.png",
         },
         {
           book_id: "rabenschwarz",
           title: "Rabenschwarz",
-          reader_url: "/index.html?book=rabenschwarz&manifest=chapter-001.json",
+          reader_url: "index.html?book=rabenschwarz&manifest=chapter-001.json",
           icon: "data/books/rabenschwarz/assets/rabenschwarz_icon.png",
         },
       ];
@@ -1870,14 +1870,23 @@
             return {
               book_id: book.book_id,
               title: book.title || fallback?.title || book.book_id,
-              reader_url:
+              reader_url: normalizeReaderUrl(
                 preferredManifest?.reader_url ||
                 fallback?.reader_url ||
                 `/index.html?book=${book.book_id}&manifest=chapter-001.json`,
+                book.book_id,
+              ),
               icon: preferredManifest?.icon || fallback?.icon || "",
             };
           })
           .sort((first, second) => first.title.localeCompare(second.title));
+      }
+
+      function normalizeReaderUrl(url, bookId) {
+        const fallbackUrl = `index.html?book=${bookId}&manifest=chapter-001.json`;
+        if (!url) return fallbackUrl;
+        if (/^https?:\/\//i.test(url)) return url;
+        return url.replace(/^\/+/, "");
       }
 
       function renderBookMenu(books = FALLBACK_BOOKS) {
@@ -1906,14 +1915,6 @@
 
       async function loadBookMenu() {
         renderBookMenu();
-        try {
-          const response = await fetch("/api/admin/books");
-          if (!response.ok) return;
-          const data = await response.json();
-          renderBookMenu(data.books || []);
-        } catch (error) {
-          console.warn(error);
-        }
       }
 
       function returnToOpening() {
