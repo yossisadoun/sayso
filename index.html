@@ -150,41 +150,6 @@
         height: 0;
       }
 
-      .opening-layouts {
-        position: fixed;
-        right: 28px;
-        bottom: max(28px, env(safe-area-inset-bottom));
-        left: 28px;
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        opacity: 1;
-        transition:
-          opacity 300ms ease,
-          transform 300ms ease;
-      }
-
-      .opening-layouts.is-hidden {
-        opacity: 0;
-        pointer-events: none;
-        transform: translateY(8px);
-      }
-
-      .opening-layout {
-        min-width: 108px;
-        padding: 10px 14px;
-        border-radius: 999px;
-        background: rgba(16, 18, 20, 0.08);
-        color: rgba(16, 18, 20, 0.7);
-        font-size: 13px;
-        font-weight: 760;
-      }
-
-      .opening-layout.is-primary {
-        background: var(--ink);
-        color: rgba(255, 255, 255, 0.94);
-      }
-
       @keyframes openingCursorBlink {
         50% {
           opacity: 0;
@@ -207,6 +172,43 @@
         grid-template-rows: minmax(0, 1fr) auto;
       }
 
+      @supports (view-transition-name: none) {
+        .stage {
+          view-transition-name: reader-stage;
+        }
+
+        .translation {
+          view-transition-name: translation-dock;
+        }
+
+        .translation-copy {
+          view-transition-name: english-copy;
+        }
+
+        .progress-wrap {
+          view-transition-name: reading-progress;
+        }
+
+        .controls {
+          view-transition-name: playback-controls;
+        }
+
+        ::view-transition-group(reader-stage),
+        ::view-transition-group(translation-dock),
+        ::view-transition-group(english-copy),
+        ::view-transition-group(reading-progress),
+        ::view-transition-group(playback-controls) {
+          animation-duration: 360ms;
+          animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        ::view-transition-old(root),
+        ::view-transition-new(root) {
+          animation-duration: 220ms;
+          animation-timing-function: ease-out;
+        }
+      }
+
       .reader {
         position: relative;
         display: flex;
@@ -215,13 +217,22 @@
         padding: max(28px, env(safe-area-inset-top)) 22px 18px;
       }
 
+      .book-chip-wrap {
+        position: relative;
+        z-index: 5;
+        width: fit-content;
+        max-width: 100%;
+        margin: 0 auto;
+      }
+
       .book-chip {
+        position: relative;
         display: flex;
         align-items: center;
         gap: 10px;
         width: fit-content;
         max-width: 100%;
-        margin: 0 auto;
+        margin: 0;
         padding: 8px 13px 8px 8px;
         border: 1px solid rgba(255, 255, 255, 0.7);
         border-radius: 999px;
@@ -232,10 +243,250 @@
         letter-spacing: 0;
         box-shadow: 0 10px 34px rgba(75, 96, 110, 0.1);
         backdrop-filter: blur(18px);
+        overflow: visible;
+        transition:
+          background 120ms ease,
+          border-color 120ms ease,
+          box-shadow 120ms ease,
+          transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
       }
 
       .book-chip:active {
         transform: translateY(1px);
+      }
+
+      .book-chip.is-flashing {
+        border-color: rgba(255, 255, 255, 0.96);
+        background: rgba(255, 255, 255, 0.62);
+        box-shadow:
+          0 14px 38px rgba(75, 96, 110, 0.16),
+          0 0 0 1px rgba(255, 255, 255, 0.5);
+        transform: scale(1.045);
+      }
+
+      .book-add-badge {
+        position: absolute;
+        top: 50%;
+        right: -25px;
+        display: block;
+        color: rgba(16, 18, 20, 0.48);
+        font-size: 12px;
+        font-weight: 860;
+        line-height: 1;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-50%);
+      }
+
+      .book-chip.is-showing-add .book-add-badge {
+        animation: bookAddBadgeRise 680ms ease-out forwards;
+      }
+
+      .book-pill-menu {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 50%;
+        width: 224px;
+        padding: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.62);
+        border-radius: 22px;
+        background:
+          linear-gradient(rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.58)),
+          rgba(255, 255, 255, 0.74);
+        box-shadow: 0 14px 34px rgba(51, 74, 87, 0.2);
+        opacity: 0;
+        pointer-events: none;
+        transform: translate(-50%, -8px) scale(0.84);
+        transform-origin: top center;
+        transition:
+          opacity 180ms ease,
+          transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+        backdrop-filter: blur(22px);
+      }
+
+      .book-chip-wrap.is-menu-open {
+        z-index: 20;
+      }
+
+      .book-chip-wrap.is-menu-open .book-pill-menu {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translate(-50%, 0) scale(1);
+      }
+
+      .book-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 11px 12px;
+        border-radius: 16px;
+        background: transparent;
+        color: rgba(16, 18, 20, 0.78);
+        font-size: 15px;
+        font-weight: 650;
+        text-align: left;
+      }
+
+      .book-menu-item:active {
+        background: rgba(16, 18, 20, 0.06);
+        transform: translateY(1px);
+      }
+
+      .book-menu-item .lucide {
+        width: 18px;
+        height: 18px;
+        flex: 0 0 24px;
+        stroke-width: 2.6;
+      }
+
+      .book-menu-divider {
+        height: 1px;
+        margin: 0 12px;
+        background: rgba(255, 255, 255, 0.44);
+      }
+
+      .book-menu-translation {
+        display: grid;
+        gap: 8px;
+        padding: 11px 12px;
+      }
+
+      .book-menu-books {
+        display: grid;
+        gap: 6px;
+        padding: 11px 12px;
+      }
+
+      .book-menu-books .book-menu-item {
+        padding: 9px 10px;
+        font-size: 14px;
+      }
+
+      .book-menu-item.is-current {
+        background: rgba(127, 156, 175, 0.18);
+        color: var(--ink);
+      }
+
+      .book-menu-layout {
+        display: grid;
+        gap: 8px;
+        padding: 11px 12px;
+      }
+
+      .book-menu-read-aloud {
+        display: grid;
+        gap: 8px;
+        padding: 11px 12px;
+      }
+
+      .book-menu-setting-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .book-menu-label {
+        color: rgba(16, 18, 20, 0.48);
+        font-size: 11px;
+        font-weight: 760;
+        letter-spacing: 0.08em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .book-menu-translation .translation-mode {
+        width: 100%;
+      }
+
+      .book-menu-translation .translation-mode button {
+        flex: 1;
+      }
+
+      .layout-mode {
+        display: inline-flex;
+        gap: 2px;
+        width: 100%;
+        padding: 2px;
+        border-radius: 999px;
+        background: rgba(16, 18, 20, 0.06);
+      }
+
+      .layout-mode button {
+        flex: 1;
+        min-width: 0;
+        padding: 7px 8px;
+        border-radius: 999px;
+        background: transparent;
+        color: rgba(16, 18, 20, 0.48);
+        font-size: 11px;
+        font-weight: 760;
+        line-height: 1;
+      }
+
+      .layout-mode button.is-primary {
+        background: rgba(255, 255, 255, 0.88);
+        color: var(--ink);
+        box-shadow: 0 4px 14px rgba(16, 18, 20, 0.08);
+      }
+
+      .read-aloud-mode {
+        display: inline-flex;
+        gap: 2px;
+        width: 100%;
+        padding: 2px;
+        border-radius: 999px;
+        background: rgba(16, 18, 20, 0.06);
+      }
+
+      .read-aloud-mode button {
+        flex: 1;
+        min-width: 0;
+        padding: 7px 8px;
+        border-radius: 999px;
+        background: transparent;
+        color: rgba(16, 18, 20, 0.48);
+        font-size: 11px;
+        font-weight: 760;
+        line-height: 1;
+      }
+
+      .read-aloud-mode button.is-primary {
+        background: rgba(255, 255, 255, 0.88);
+        color: var(--ink);
+        box-shadow: 0 4px 14px rgba(16, 18, 20, 0.08);
+      }
+
+      .read-repeat-button {
+        min-width: 34px;
+        padding: 5px 8px;
+        border-radius: 999px;
+        background: rgba(16, 18, 20, 0.08);
+        color: rgba(16, 18, 20, 0.62);
+        font-size: 11px;
+        font-weight: 820;
+        line-height: 1;
+      }
+
+      .read-repeat-button:active {
+        transform: translateY(1px);
+      }
+
+      @keyframes bookAddBadgeRise {
+        0% {
+          opacity: 1;
+          transform: translateY(-50%);
+        }
+
+        72% {
+          opacity: 1;
+        }
+
+        100% {
+          opacity: 0;
+          transform: translateY(calc(-50% - 18px));
+        }
       }
 
       .book-icon {
@@ -934,7 +1185,7 @@
           grid-template-rows: minmax(0, 1.8fr) minmax(204px, 1fr);
         }
 
-        .book-chip {
+        .book-chip-wrap {
           margin-top: 0;
         }
 
@@ -962,31 +1213,95 @@
       <h1 class="opening-title" aria-label="Hi Meishar, let's read Moby Dick.">
         <span id="openingTypedText"></span><button class="opening-book is-hidden" id="openingBook" type="button" aria-label="Moby Dick"><span id="openingBookText"></span></button><span class="opening-punctuation is-hidden" id="openingPunctuation">.</span><span class="opening-cursor" aria-hidden="true">|</span>
       </h1>
-      <div class="opening-layouts is-hidden" id="openingLayouts" aria-label="Choose reader layout">
-        <button class="opening-layout" id="standardLayoutButton" type="button">Standard</button>
-        <button class="opening-layout is-primary" id="compactLayoutButton" type="button">Compact</button>
-      </div>
     </section>
 
     <main class="app" id="app" aria-label="German reading trainer" aria-hidden="true" inert>
       <section class="reader" aria-label="German reading area">
-        <button
-          class="book-chip"
-          id="bookChip"
-          type="button"
-          aria-haspopup="dialog"
-          aria-expanded="false"
-          aria-label="Open tapped words"
-        >
-          <img
-            class="book-icon"
-            id="bookIcon"
-            src="data/books/moby-dick/assets/moby_dick_icon.png"
-            alt=""
-            aria-hidden="true"
-          />
-          <span id="bookChipLabel">Moby-Dick</span>
-        </button>
+        <div class="book-chip-wrap" id="bookChipWrap">
+          <button
+            class="book-chip"
+            id="bookChip"
+            type="button"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-controls="bookPillMenu"
+            aria-label="Open book menu"
+          >
+            <img
+              class="book-icon"
+              id="bookIcon"
+              src="data/books/moby-dick/assets/moby_dick_icon.png"
+              alt=""
+              aria-hidden="true"
+            />
+            <span id="bookChipLabel">Moby-Dick</span>
+            <span class="book-add-badge" id="bookAddBadge" aria-hidden="true">+1</span>
+          </button>
+          <div class="book-pill-menu" id="bookPillMenu" role="menu" aria-hidden="true">
+            <button class="book-menu-item" id="bookMenuHome" type="button" role="menuitem">
+              <svg class="lucide" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="m3 11 9-8 9 8"></path>
+                <path d="M5 10v10h14V10"></path>
+                <path d="M9 20v-6h6v6"></path>
+              </svg>
+              <span>Home</span>
+            </button>
+            <div class="book-menu-divider" aria-hidden="true"></div>
+            <button class="book-menu-item" id="bookMenuWords" type="button" role="menuitem">
+              <svg class="lucide" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"></path>
+                <path d="M8 7h8"></path>
+                <path d="M8 11h6"></path>
+              </svg>
+              <span>Words</span>
+            </button>
+            <div class="book-menu-divider" aria-hidden="true"></div>
+            <div class="book-menu-books">
+              <span class="book-menu-label">Books</span>
+              <div id="bookMenuBooks" role="none"></div>
+            </div>
+            <div class="book-menu-divider" aria-hidden="true"></div>
+            <div class="book-menu-layout">
+              <span class="book-menu-label">Layout</span>
+              <div class="layout-mode" aria-label="Reader layout">
+                <button id="standardLayoutButton" type="button" aria-pressed="false">Standard</button>
+                <button class="is-primary" id="compactLayoutButton" type="button" aria-pressed="true">
+                  Compact
+                </button>
+              </div>
+            </div>
+            <div class="book-menu-divider" aria-hidden="true"></div>
+            <div class="book-menu-translation">
+              <span class="book-menu-label">Translation</span>
+              <div class="translation-mode" aria-label="Translation source">
+                <button id="bookTranslationButton" type="button" aria-pressed="true">Book</button>
+                <button id="aiTranslationButton" type="button" aria-pressed="false">AI</button>
+              </div>
+            </div>
+            <div class="book-menu-divider" aria-hidden="true"></div>
+            <div class="book-menu-read-aloud">
+              <div class="book-menu-setting-header">
+                <span class="book-menu-label">Read aloud</span>
+                <button
+                  class="read-repeat-button"
+                  id="readRepeatButton"
+                  type="button"
+                  aria-label="Read each segment 1 time"
+                >
+                  1x
+                </button>
+              </div>
+              <div class="read-aloud-mode" aria-label="Read aloud language">
+                <button class="is-primary" id="readGermanButton" type="button" aria-pressed="true">
+                  German
+                </button>
+                <button id="readBothButton" type="button" aria-pressed="false">Both</button>
+              </div>
+            </div>
+            <div class="book-menu-divider" aria-hidden="true"></div>
+          </div>
+        </div>
 
         <div class="stage">
           <div class="words" id="words" aria-live="polite"></div>
@@ -1013,10 +1328,6 @@
       <section class="translation" aria-label="English translation">
         <div class="translation-label">
           <span>English</span>
-          <div class="translation-mode" aria-label="Translation source">
-            <button id="bookTranslationButton" type="button" aria-pressed="true">Book</button>
-            <button id="aiTranslationButton" type="button" aria-pressed="false">AI</button>
-          </div>
           <span id="segmentCount">1 / 5</span>
         </div>
 
@@ -1112,6 +1423,22 @@
       const MANIFEST_FILE = safeManifest(params.get("manifest"), "chapter-001.json");
       const BOOK_DIR = `data/books/${BOOK_ID}`;
       const PAGE_MANIFEST_URL = `${BOOK_DIR}/${MANIFEST_FILE}`;
+      const FALLBACK_BOOKS = [
+        {
+          book_id: "moby-dick",
+          title: "Moby-Dick",
+          reader_url: "/index.html?book=moby-dick&manifest=chapter-001.json",
+          icon: "data/books/moby-dick/assets/moby_dick_icon.png",
+        },
+        {
+          book_id: "rabenschwarz",
+          title: "Rabenschwarz",
+          reader_url: "/index.html?book=rabenschwarz&manifest=chapter-001.json",
+          icon: "data/books/rabenschwarz/assets/rabenschwarz_icon.png",
+        },
+      ];
+      const currentBookFallback =
+        FALLBACK_BOOKS.find((book) => book.book_id === BOOK_ID) || FALLBACK_BOOKS[0];
 
       const segments = [
         {
@@ -1230,8 +1557,17 @@
       const speedButton = document.querySelector("#speedButton");
       const continuousButton = document.querySelector("#continuousButton");
       const continuousDelayBadge = document.querySelector(".continuous-delay");
+      const bookChipWrap = document.querySelector("#bookChipWrap");
       const bookChip = document.querySelector("#bookChip");
       const bookChipLabel = document.querySelector("#bookChipLabel");
+      const bookAddBadge = document.querySelector("#bookAddBadge");
+      const bookPillMenu = document.querySelector("#bookPillMenu");
+      const bookMenuBooks = document.querySelector("#bookMenuBooks");
+      const bookMenuHome = document.querySelector("#bookMenuHome");
+      const bookMenuWords = document.querySelector("#bookMenuWords");
+      const readGermanButton = document.querySelector("#readGermanButton");
+      const readBothButton = document.querySelector("#readBothButton");
+      const readRepeatButton = document.querySelector("#readRepeatButton");
       const bookIcon = document.querySelector("#bookIcon");
       const appEl = document.querySelector(".app");
       const readerEl = document.querySelector(".reader");
@@ -1253,7 +1589,6 @@
       const openingTypedText = document.querySelector("#openingTypedText");
       const openingBookText = document.querySelector("#openingBookText");
       const openingPunctuation = document.querySelector("#openingPunctuation");
-      const openingLayouts = document.querySelector("#openingLayouts");
       const standardLayoutButton = document.querySelector("#standardLayoutButton");
       const compactLayoutButton = document.querySelector("#compactLayoutButton");
 
@@ -1268,18 +1603,24 @@
       let playbackToken = 0;
       let selectedVoiceId = window.localStorage.getItem("sayso.voiceId") || "";
       let translationMode = window.localStorage.getItem("sayso.translationMode") || "book";
-      let currentBookTitle = "Moby-Dick";
+      let currentBookTitle = currentBookFallback.title;
       const WORD_HISTORY_KEY = `sayso.wordHistory.${BOOK_ID}`;
       const WORD_HISTORY_LIMIT = 80;
       const READING_POSITION_KEY = `sayso.readingPosition.${BOOK_ID}.${MANIFEST_FILE}`;
       const READER_LAYOUT_KEY = "sayso.readerLayout";
       const CONTINUOUS_PLAYBACK_KEY = "sayso.continuousPlayback";
+      const READ_ALOUD_KEY = "sayso.readAloudMode";
+      const READ_REPEAT_KEY = "sayso.readRepeatCount";
       const CONTINUOUS_MODES = ["off", "on", "delay-2", "delay-5"];
+      const READ_REPEAT_OPTIONS = [1, 2, 3];
+      const REREAD_DELAY_MS = 1000;
       let wordHistory = loadWordHistory();
       const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5];
       let playbackSpeed = Number(window.localStorage.getItem("sayso.playbackSpeed")) || 1;
       if (!SPEED_OPTIONS.includes(playbackSpeed)) playbackSpeed = 1;
       let continuousMode = loadContinuousMode();
+      let readAloudMode = loadReadAloudMode();
+      let readRepeatCount = loadReadRepeatCount();
       let cachedVoiceId = "";
       let lastTouchEndAt = 0;
       let totalDurationMs = 0;
@@ -1289,6 +1630,9 @@
       const historyAudioPlayer = new Audio();
       historyAudioPlayer.preload = "auto";
       let historyPlaybackToken = 0;
+      let bookPillFeedbackToken = 0;
+      let isSpeakingEnglishTranslation = false;
+      let currentSegmentReadPass = 1;
 
       appEl.addEventListener(
         "touchmove",
@@ -1318,7 +1662,7 @@
 
       async function typeOpeningTitle() {
         const text = "Hi Meishar, let's read ";
-        const bookTitle = "Moby Dick";
+        const bookTitle = currentBookTitle;
         const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
         if (reducedMotion) {
@@ -1328,7 +1672,6 @@
           openingBookText.textContent = bookTitle;
           openingBook.classList.remove("is-hidden");
           openingPunctuation.classList.remove("is-hidden");
-          openingLayouts.classList.remove("is-hidden");
           return;
         }
 
@@ -1366,15 +1709,15 @@
         }
         await sleep(180);
         openingPunctuation.classList.remove("is-hidden");
-        await sleep(220);
-        openingLayouts.classList.remove("is-hidden");
       }
 
-      function setReaderLayout(layout) {
+      function applyReaderLayout(layout) {
         const isCompact = layout === "compact";
         appEl.classList.toggle("is-compact", isCompact);
         standardLayoutButton.classList.toggle("is-primary", !isCompact);
         compactLayoutButton.classList.toggle("is-primary", isCompact);
+        standardLayoutButton.setAttribute("aria-pressed", String(!isCompact));
+        compactLayoutButton.setAttribute("aria-pressed", String(isCompact));
 
         if (isCompact) {
           stageEl.appendChild(translationCopy);
@@ -1387,7 +1730,100 @@
         window.localStorage.setItem(READER_LAYOUT_KEY, isCompact ? "compact" : "standard");
       }
 
-      function enterReader(layout = "standard") {
+      function currentReaderLayout() {
+        return appEl.classList.contains("is-compact") ? "compact" : "standard";
+      }
+
+      function prefersReducedMotion() {
+        return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      }
+
+      function animateReaderLayoutFallback(layout) {
+        const movingElements = [translationCopy, progressWrap, controlsEl].filter(Boolean);
+        const firstRows = [
+          readerEl.getBoundingClientRect().height,
+          translationSection.getBoundingClientRect().height,
+        ];
+        const firstRects = new Map(
+          movingElements.map((element) => [element, element.getBoundingClientRect()]),
+        );
+
+        movingElements.forEach((element) => {
+          element.getAnimations().forEach((animation) => animation.cancel());
+        });
+
+        applyReaderLayout(layout);
+
+        const lastRows = [
+          readerEl.getBoundingClientRect().height,
+          translationSection.getBoundingClientRect().height,
+        ];
+        const lastRects = new Map(
+          movingElements.map((element) => [element, element.getBoundingClientRect()]),
+        );
+
+        appEl.style.transition = "none";
+        appEl.style.gridTemplateRows = `${firstRows[0]}px ${firstRows[1]}px`;
+        void appEl.offsetHeight;
+        appEl.style.transition = "grid-template-rows 360ms cubic-bezier(0.2, 0.8, 0.2, 1)";
+
+        requestAnimationFrame(() => {
+          appEl.style.gridTemplateRows = `${lastRows[0]}px ${lastRows[1]}px`;
+        });
+
+        window.setTimeout(() => {
+          appEl.style.transition = "";
+          appEl.style.gridTemplateRows = "";
+        }, 390);
+
+        movingElements.forEach((element) => {
+          const first = firstRects.get(element);
+          const last = lastRects.get(element);
+          if (!first || !last) return;
+          const deltaX = first.left - last.left;
+          const deltaY = first.top - last.top;
+          if (Math.abs(deltaX) < 0.5 && Math.abs(deltaY) < 0.5) return;
+          element.animate(
+            [
+              { transform: `translate(${deltaX}px, ${deltaY}px)` },
+              { transform: "translate(0, 0)" },
+            ],
+            {
+              duration: 360,
+              easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+            },
+          );
+        });
+      }
+
+      function setReaderLayout(layout, options = {}) {
+        const nextLayout = layout === "standard" ? "standard" : "compact";
+        const shouldAnimate =
+          options.animate &&
+          currentReaderLayout() !== nextLayout &&
+          !prefersReducedMotion() &&
+          !document.body.classList.contains("intro-active");
+
+        if (!shouldAnimate) {
+          applyReaderLayout(nextLayout);
+          return;
+        }
+
+        if (document.startViewTransition) {
+          document.startViewTransition(() => applyReaderLayout(nextLayout));
+          return;
+        }
+
+        animateReaderLayoutFallback(nextLayout);
+      }
+
+      function chooseReaderLayout(layout) {
+        closeBookMenu();
+        setReaderLayout(layout, { animate: true });
+        bookChip.focus({ preventScroll: true });
+      }
+
+      function enterReader(layout = "compact") {
         setReaderLayout(layout);
         openingScreen.classList.add("is-dismissed");
         document.body.classList.remove("intro-active");
@@ -1397,6 +1833,104 @@
           openingScreen.setAttribute("aria-hidden", "true");
           openingBook.tabIndex = -1;
         }, 620);
+      }
+
+      function closeBookMenu(restoreFocus = false) {
+        bookChipWrap.classList.remove("is-menu-open");
+        bookPillMenu.setAttribute("aria-hidden", "true");
+        bookChip.setAttribute("aria-expanded", "false");
+        if (restoreFocus) bookChip.focus({ preventScroll: true });
+      }
+
+      function openBookMenu() {
+        if (isPlaying) pausePlayback();
+        saveReadingPosition();
+        dismissTooltip();
+        bookChipWrap.classList.add("is-menu-open");
+        bookPillMenu.setAttribute("aria-hidden", "false");
+        bookChip.setAttribute("aria-expanded", "true");
+      }
+
+      function toggleBookMenu() {
+        if (bookChipWrap.classList.contains("is-menu-open")) {
+          closeBookMenu();
+        } else {
+          openBookMenu();
+        }
+      }
+
+      function normalizedBookList(books) {
+        if (!Array.isArray(books) || !books.length) return FALLBACK_BOOKS;
+        return books
+          .map((book) => {
+            const preferredManifest =
+              book.manifests?.find((manifest) => manifest.name === "chapter-001.json") ||
+              book.manifests?.[0];
+            const fallback = FALLBACK_BOOKS.find((item) => item.book_id === book.book_id);
+            return {
+              book_id: book.book_id,
+              title: book.title || fallback?.title || book.book_id,
+              reader_url:
+                preferredManifest?.reader_url ||
+                fallback?.reader_url ||
+                `/index.html?book=${book.book_id}&manifest=chapter-001.json`,
+              icon: preferredManifest?.icon || fallback?.icon || "",
+            };
+          })
+          .sort((first, second) => first.title.localeCompare(second.title));
+      }
+
+      function renderBookMenu(books = FALLBACK_BOOKS) {
+        bookMenuBooks.innerHTML = "";
+        normalizedBookList(books).forEach((book) => {
+          const button = document.createElement("button");
+          button.className = "book-menu-item";
+          button.type = "button";
+          button.role = "menuitem";
+          button.textContent = book.title;
+          if (book.book_id === BOOK_ID) {
+            button.classList.add("is-current");
+            button.setAttribute("aria-current", "page");
+          }
+          button.addEventListener("click", () => {
+            if (book.book_id === BOOK_ID) {
+              closeBookMenu(true);
+              return;
+            }
+            saveReadingPosition();
+            window.location.href = book.reader_url;
+          });
+          bookMenuBooks.appendChild(button);
+        });
+      }
+
+      async function loadBookMenu() {
+        renderBookMenu();
+        try {
+          const response = await fetch("/api/admin/books");
+          if (!response.ok) return;
+          const data = await response.json();
+          renderBookMenu(data.books || []);
+        } catch (error) {
+          console.warn(error);
+        }
+      }
+
+      function returnToOpening() {
+        closeBookMenu();
+        pausePlayback();
+        stopHistoryPreview();
+        saveReadingPosition();
+        dismissTooltip();
+        openingBook.classList.remove("is-hidden");
+        openingPunctuation.classList.remove("is-hidden");
+        openingScreen.removeAttribute("aria-hidden");
+        openingScreen.classList.remove("is-dismissed");
+        document.body.classList.add("intro-active");
+        appEl.setAttribute("aria-hidden", "true");
+        appEl.setAttribute("inert", "");
+        openingBook.tabIndex = 0;
+        openingBook.focus({ preventScroll: true });
       }
 
       function formatSpeed(speed) {
@@ -1459,6 +1993,42 @@
         continuousMode = CONTINUOUS_MODES[nextIndex];
         window.localStorage.setItem(CONTINUOUS_PLAYBACK_KEY, continuousMode);
         updateContinuousButton();
+      }
+
+      function loadReadAloudMode() {
+        const saved = window.localStorage.getItem(READ_ALOUD_KEY);
+        return saved === "both" ? "both" : "german";
+      }
+
+      function updateReadAloudButtons() {
+        const isBoth = readAloudMode === "both";
+        readGermanButton.classList.toggle("is-primary", !isBoth);
+        readBothButton.classList.toggle("is-primary", isBoth);
+        readGermanButton.setAttribute("aria-pressed", String(!isBoth));
+        readBothButton.setAttribute("aria-pressed", String(isBoth));
+      }
+
+      function setReadAloudMode(mode) {
+        readAloudMode = mode === "both" ? "both" : "german";
+        window.localStorage.setItem(READ_ALOUD_KEY, readAloudMode);
+        updateReadAloudButtons();
+      }
+
+      function loadReadRepeatCount() {
+        const saved = Number(window.localStorage.getItem(READ_REPEAT_KEY));
+        return READ_REPEAT_OPTIONS.includes(saved) ? saved : 1;
+      }
+
+      function updateReadRepeatButton() {
+        readRepeatButton.textContent = `${readRepeatCount}x`;
+        readRepeatButton.setAttribute("aria-label", `Read each segment ${readRepeatCount} time${readRepeatCount === 1 ? "" : "s"}`);
+      }
+
+      function cycleReadRepeatCount() {
+        const currentIndex = READ_REPEAT_OPTIONS.indexOf(readRepeatCount);
+        readRepeatCount = READ_REPEAT_OPTIONS[(currentIndex + 1) % READ_REPEAT_OPTIONS.length];
+        window.localStorage.setItem(READ_REPEAT_KEY, String(readRepeatCount));
+        updateReadRepeatButton();
       }
 
       function cleanWord(word) {
@@ -1591,6 +2161,25 @@
         renderWordHistory();
       }
 
+      function triggerBookPillFeedback() {
+        bookPillFeedbackToken += 1;
+        const token = bookPillFeedbackToken;
+
+        bookChip.classList.remove("is-flashing", "is-showing-add");
+        void bookAddBadge.offsetWidth;
+        bookChip.classList.add("is-flashing", "is-showing-add");
+
+        window.setTimeout(() => {
+          if (token !== bookPillFeedbackToken) return;
+          bookChip.classList.remove("is-flashing");
+        }, 160);
+
+        window.setTimeout(() => {
+          if (token !== bookPillFeedbackToken) return;
+          bookChip.classList.remove("is-showing-add");
+        }, 720);
+      }
+
       function renderWordHistory() {
         wordHistoryList.innerHTML = "";
 
@@ -1647,10 +2236,10 @@
       function openWordHistory() {
         if (isPlaying) pausePlayback();
         saveReadingPosition();
+        closeBookMenu();
         renderWordHistory();
         wordHistorySheet.classList.add("is-open");
         wordHistorySheet.setAttribute("aria-hidden", "false");
-        bookChip.setAttribute("aria-expanded", "true");
         wordHistoryClose.focus({ preventScroll: true });
       }
 
@@ -1658,7 +2247,6 @@
         stopHistoryPreview();
         wordHistorySheet.classList.remove("is-open");
         wordHistorySheet.setAttribute("aria-hidden", "true");
-        bookChip.setAttribute("aria-expanded", "false");
         bookChip.focus({ preventScroll: true });
       }
 
@@ -1745,8 +2333,11 @@
           currentBookTitle = manifest.title || BOOK_ID;
           document.title = `${currentBookTitle} | Say So Reader`;
           bookChipLabel.textContent = currentBookTitle;
+          bookIcon.style.display = "";
           if (manifest.icon) {
             bookIcon.src = resolveBookPath(manifest.icon);
+          } else if (currentBookFallback.icon) {
+            bookIcon.src = currentBookFallback.icon;
           } else if (BOOK_ID !== "moby-dick") {
             bookIcon.style.display = "none";
           }
@@ -1901,11 +2492,13 @@
       }
 
       function showLearning(index, button) {
+        closeBookMenu();
         const segment = segments[segmentIndex];
         const word = getWords(segment)[index];
         const key = cleanWord(word);
         const note = segment.notes[key] || ["word", "Translation note will appear here."];
         rememberTappedWord(word, note, segment, index);
+        triggerBookPillFeedback();
 
         selectedWordIndex = index;
         const wasOpen = wordTooltip.classList.contains("is-open");
@@ -1933,9 +2526,13 @@
       }
 
       appEl.addEventListener("pointerdown", (event) => {
-        if (!wordTooltip.classList.contains("is-open")) return;
-        if (event.target.closest(".word") || event.target.closest(".word-tooltip")) return;
-        dismissTooltip();
+        if (bookChipWrap.classList.contains("is-menu-open") && !event.target.closest(".book-chip-wrap")) {
+          closeBookMenu();
+        }
+        if (wordTooltip.classList.contains("is-open")) {
+          if (event.target.closest(".word") || event.target.closest(".word-tooltip")) return;
+          dismissTooltip();
+        }
       });
 
       function clearPlayDelayFeedback() {
@@ -1945,12 +2542,12 @@
         playButton.style.removeProperty("--countdown-progress");
       }
 
-      function startPlayDelayFeedback(delayMs) {
+      function startPlayDelayFeedback(delayMs, ariaLabel = "Waiting before next phrase") {
         const startedAt = performance.now();
         clearPlayDelayFeedback();
         playButton.style.setProperty("--countdown-progress", "360deg");
         playButton.classList.add("is-waiting");
-        playButton.setAttribute("aria-label", "Waiting before next phrase");
+        playButton.setAttribute("aria-label", ariaLabel);
 
         function tick(now) {
           const progress = Math.min(1, (now - startedAt) / delayMs);
@@ -1973,6 +2570,8 @@
         audioPlayer.pause();
         audioPlayer.removeAttribute("src");
         audioPlayer.load();
+        isSpeakingEnglishTranslation = false;
+        currentSegmentReadPass = 1;
         isPlaying = false;
         playButton.classList.remove("is-playing");
         playButton.setAttribute("aria-label", "Play phrase");
@@ -1987,6 +2586,8 @@
         playbackTimer = null;
         audioFrame = null;
         audioPlayer.pause();
+        isSpeakingEnglishTranslation = false;
+        currentSegmentReadPass = 1;
         isPlaying = false;
         playButton.classList.remove("is-playing");
         playButton.setAttribute("aria-label", "Play phrase");
@@ -2001,6 +2602,8 @@
         playbackTimer = null;
         audioFrame = null;
         audioPlayer.pause();
+        isSpeakingEnglishTranslation = false;
+        currentSegmentReadPass = 1;
         isPlaying = false;
         currentWordIndex = -1;
         playButton.classList.remove("is-playing");
@@ -2047,6 +2650,66 @@
 
       function finishCurrentSegment(token) {
         if (!isPlaying || token !== playbackToken) return;
+        if (isSpeakingEnglishTranslation) return;
+
+        if (shouldReadEnglishAloud()) {
+          playEnglishTranslationThenFinish(token);
+          return;
+        }
+
+        completeCurrentSegment(token);
+      }
+
+      function shouldReadEnglishAloud() {
+        return (
+          readAloudMode === "both" &&
+          "speechSynthesis" in window &&
+          Boolean(activeTranslation(segments[segmentIndex]).trim())
+        );
+      }
+
+      function playEnglishTranslationThenFinish(token) {
+        const translation = activeTranslation(segments[segmentIndex]).trim();
+        if (!translation) {
+          completeCurrentSegment(token);
+          return;
+        }
+
+        isSpeakingEnglishTranslation = true;
+        window.clearTimeout(playbackTimer);
+        window.cancelAnimationFrame(audioFrame);
+        clearPlayDelayFeedback();
+        playbackTimer = null;
+        audioFrame = null;
+        audioPlayer.pause();
+        currentWordIndex = -1;
+        selectedWordIndex = null;
+        hideTooltip();
+        updateWordClasses();
+        updateProgressFromElapsed(segmentEndMs(segmentIndex));
+
+        const utterance = new SpeechSynthesisUtterance(translation);
+        utterance.lang = "en-US";
+        utterance.rate = 0.9 * playbackSpeed;
+        utterance.pitch = 1;
+        const finish = () => {
+          if (token !== playbackToken) return;
+          isSpeakingEnglishTranslation = false;
+          completeCurrentSegment(token);
+        };
+        utterance.onend = finish;
+        utterance.onerror = finish;
+        window.speechSynthesis.speak(utterance);
+      }
+
+      function completeCurrentSegment(token) {
+        if (!isPlaying || token !== playbackToken) return;
+
+        if (currentSegmentReadPass < readRepeatCount) {
+          currentSegmentReadPass += 1;
+          scheduleCurrentSegmentReread(token);
+          return;
+        }
 
         if (continuousMode === "off") {
           finishSingleSegmentPlayback();
@@ -2071,12 +2734,14 @@
             playbackTimer = window.setTimeout(() => {
               if (!isPlaying || token !== playbackToken) return;
               segmentIndex += 1;
+              currentSegmentReadPass = 1;
               saveReadingPosition();
               render();
               playCurrentSegment();
             }, delayMs);
           } else {
             segmentIndex += 1;
+            currentSegmentReadPass = 1;
             saveReadingPosition();
             render();
             if (canContinueCurrentAudio) {
@@ -2090,6 +2755,35 @@
 
         progressFill.style.width = "100%";
         stopPlayback();
+      }
+
+      function replayCurrentSegment() {
+        window.clearTimeout(playbackTimer);
+        window.cancelAnimationFrame(audioFrame);
+        clearPlayDelayFeedback();
+        playbackTimer = null;
+        audioFrame = null;
+        audioPlayer.pause();
+        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+        isSpeakingEnglishTranslation = false;
+        currentWordIndex = -1;
+        selectedWordIndex = null;
+        hideTooltip();
+        updateWordClasses();
+        updateProgressFromElapsed(segmentStartMs(segmentIndex));
+        playCurrentSegment({ preserveReadPass: true });
+      }
+
+      function scheduleCurrentSegmentReread(token) {
+        window.clearTimeout(playbackTimer);
+        window.cancelAnimationFrame(audioFrame);
+        audioFrame = null;
+        audioPlayer.pause();
+        startPlayDelayFeedback(REREAD_DELAY_MS, "Waiting before rereading phrase");
+        playbackTimer = window.setTimeout(() => {
+          if (!isPlaying || token !== playbackToken) return;
+          replayCurrentSegment();
+        }, REREAD_DELAY_MS);
       }
 
       async function loadSegmentTiming(segment) {
@@ -2384,12 +3078,14 @@
         playCurrentSegment();
       }
 
-      async function playCurrentSegment() {
+      async function playCurrentSegment(options = {}) {
         window.clearTimeout(playbackTimer);
         window.cancelAnimationFrame(audioFrame);
         clearPlayDelayFeedback();
         playbackToken += 1;
         const token = playbackToken;
+        isSpeakingEnglishTranslation = false;
+        if (!options.preserveReadPass) currentSegmentReadPass = 1;
         currentWordIndex = -1;
         audioFrame = null;
         playButton.setAttribute("aria-label", "Pause phrase");
@@ -2429,10 +3125,15 @@
       continuousButton.addEventListener("click", toggleContinuousPlayback);
       bookTranslationButton.addEventListener("click", () => setTranslationMode("book"));
       aiTranslationButton.addEventListener("click", () => setTranslationMode("ai"));
-      openingBook.addEventListener("click", () => enterReader("standard"));
-      standardLayoutButton.addEventListener("click", () => enterReader("standard"));
-      compactLayoutButton.addEventListener("click", () => enterReader("compact"));
-      bookChip.addEventListener("click", openWordHistory);
+      readGermanButton.addEventListener("click", () => setReadAloudMode("german"));
+      readBothButton.addEventListener("click", () => setReadAloudMode("both"));
+      readRepeatButton.addEventListener("click", cycleReadRepeatCount);
+      openingBook.addEventListener("click", () => enterReader("compact"));
+      standardLayoutButton.addEventListener("click", () => chooseReaderLayout("standard"));
+      compactLayoutButton.addEventListener("click", () => chooseReaderLayout("compact"));
+      bookChip.addEventListener("click", toggleBookMenu);
+      bookMenuHome.addEventListener("click", returnToOpening);
+      bookMenuWords.addEventListener("click", openWordHistory);
       remainingEl.addEventListener("click", openToc);
       wordHistoryClose.addEventListener("click", closeWordHistory);
       wordHistorySheet.addEventListener("click", (event) => {
@@ -2444,7 +3145,9 @@
       });
       window.addEventListener("keydown", (event) => {
         if (event.key !== "Escape") return;
-        if (wordHistorySheet.classList.contains("is-open")) {
+        if (bookChipWrap.classList.contains("is-menu-open")) {
+          closeBookMenu(true);
+        } else if (wordHistorySheet.classList.contains("is-open")) {
           closeWordHistory();
         } else if (tocSheet.classList.contains("is-open")) {
           closeToc();
@@ -2452,11 +3155,15 @@
       });
 
       updateVoiceChip();
+      renderBookMenu();
       updateSpeedButton();
       updateContinuousButton();
+      updateReadAloudButtons();
+      updateReadRepeatButton();
       typeOpeningTitle();
       renderWordHistory();
       render();
+      loadBookMenu();
       loadPageManifest();
     </script>
   </body>
