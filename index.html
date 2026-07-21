@@ -577,6 +577,16 @@
         color: var(--ink);
       }
 
+      .reader-error {
+        max-width: 340px;
+        margin: 0 auto;
+        color: rgba(16, 18, 20, 0.56);
+        font-size: 15px;
+        font-weight: 650;
+        line-height: 1.35;
+        text-align: center;
+      }
+
       .word-tooltip {
         position: absolute;
         z-index: 4;
@@ -2343,10 +2353,12 @@
             bookIcon.style.display = "none";
           }
           cachedVoiceId = manifest.selected_voice_id || "";
+          setPlaybackControlsDisabled(false);
           const narrationChunks = Object.fromEntries(
             (manifest.narration_chunks || []).map((chunk) => [chunk.id, chunk]),
           );
           const readingUnits = manifest.reading_units || manifest.chunks || [];
+          if (!readingUnits.length) throw new Error("Page manifest has no reading units");
 
           segments.splice(
             0,
@@ -2377,7 +2389,7 @@
 
           if (!isPlaying) render();
         } catch (error) {
-          console.warn(error);
+          renderBookLoadError(error);
         }
       }
 
@@ -2439,6 +2451,14 @@
       }
 
       function render() {
+        if (!segments.length) {
+          renderBookPlaceholder(
+            `Could not load ${currentBookTitle}.`,
+            "The book files are missing or unavailable.",
+          );
+          return;
+        }
+
         const segment = segments[segmentIndex];
         const words = getWords(segment);
 
@@ -2471,6 +2491,47 @@
         hideTooltip();
         updateTranslationModeButtons();
         updateWordClasses();
+      }
+
+      function setPlaybackControlsDisabled(disabled) {
+        playButton.disabled = disabled;
+        prevButton.disabled = disabled;
+        nextButton.disabled = disabled;
+      }
+
+      function renderBookPlaceholder(message, detail = "") {
+        wordsEl.innerHTML = "";
+        const node = document.createElement("div");
+        node.className = "reader-error";
+        node.textContent = message;
+        wordsEl.appendChild(node);
+        translationEl.textContent = detail;
+        translationEl.classList.remove("is-long", "is-very-long");
+        segmentCountEl.textContent = "0 / 0";
+        remainingEl.textContent = "0 phrases left";
+        remainingEl.setAttribute("aria-label", "Open contents, 0 phrases left");
+        updateProgressFromElapsed(0);
+        currentWordIndex = -1;
+        selectedWordIndex = null;
+        hideTooltip();
+        updateTranslationModeButtons();
+        updateWordClasses();
+      }
+
+      function renderBookLoadError(error) {
+        currentBookTitle = currentBookFallback.title || BOOK_ID;
+        document.title = `${currentBookTitle} unavailable | Say So Reader`;
+        bookChipLabel.textContent = currentBookTitle;
+        bookIcon.style.display = currentBookFallback.icon ? "" : "none";
+        if (currentBookFallback.icon) bookIcon.src = currentBookFallback.icon;
+        segments.splice(0, segments.length);
+        segmentIndex = 0;
+        setPlaybackControlsDisabled(true);
+        renderBookPlaceholder(
+          `Could not load ${currentBookTitle}.`,
+          "The book files are missing or unavailable.",
+        );
+        console.warn(error);
       }
 
       function updateWordClasses() {
@@ -3163,7 +3224,11 @@
       updateReadRepeatButton();
       typeOpeningTitle();
       renderWordHistory();
-      render();
+      if (BOOK_ID === "moby-dick") {
+        render();
+      } else {
+        renderBookPlaceholder(`Loading ${currentBookTitle}...`);
+      }
       loadBookMenu();
       loadPageManifest();
     </script>
